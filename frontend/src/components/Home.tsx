@@ -15,14 +15,16 @@ const ArticleCard = ({ id, title, excerpt, date, author, tags, views }: {
   views: number;
 }) => {
   return (
-    <div className="card mb-4 shadow-sm">
+    <div className="card mb-4 shadow-sm h-100">
       <div className="card-body">
         <h3 className="card-title">
           <Link to={`/articles/${id}`} className="text-decoration-none text-dark">
             {title}
           </Link>
         </h3>
-        <p className="card-text">{excerpt}</p>
+        <p className="card-text text-truncate" style={{ maxHeight: '4.5em', overflow: 'hidden' }}>
+          {excerpt}
+        </p>
         <div className="d-flex flex-wrap justify-content-between text-muted small">
           <div className="mb-2 mb-md-0">
             <span className="me-3">
@@ -166,37 +168,61 @@ const Home = () => {
           </div>
         </div>
         
-        <div id="featuredArticlesCarousel" className="carousel slide" data-bs-ride="carousel">
-          <div className="carousel-indicators">
-            {featuredArticles.map((_, index) => (
-              <button
-                key={index}
-                type="button"
-                data-bs-target="#featuredArticlesCarousel"
-                data-bs-slide-to={index}
-                className={index === 0 ? "active" : ""}
-                aria-current={index === 0 ? "true" : "false"}
-                aria-label={`Slide ${index + 1}`}
-              ></button>
-            ))}
-          </div>
-          
-          <div className="carousel-inner rounded-3 shadow">
-            {featuredArticles.map((article, index) => (
-              <div key={article.id} className={`carousel-item ${index === 0 ? 'active' : ''}`}>
-                <FeaturedArticleSlide article={article} />
+        <div className="row">
+          {/* Left-side carousel */}
+          <div className="col-12 col-lg-7">
+            <div id="featuredArticlesCarousel" className="carousel slide" data-bs-ride="carousel">
+              <div className="carousel-indicators">
+                {featuredArticles.map((_, index) => (
+                  <button
+                    key={index}
+                    type="button"
+                    data-bs-target="#featuredArticlesCarousel"
+                    data-bs-slide-to={index}
+                    className={index === 0 ? "active" : ""}
+                    aria-current={index === 0 ? "true" : "false"}
+                    aria-label={`Slide ${index + 1}`}
+                  ></button>
+                ))}
               </div>
-            ))}
+              
+              <div className="carousel-inner rounded-3 shadow">
+                {featuredArticles.map((article, index) => (
+                  <div key={article.id} className={`carousel-item ${index === 0 ? 'active' : ''}`}>
+                    <FeaturedArticleSlide article={article} />
+                  </div>
+                ))}
+              </div>
+              
+              <button className="carousel-control-prev" type="button" data-bs-target="#featuredArticlesCarousel" data-bs-slide="prev">
+                <span className="carousel-control-prev-icon" aria-hidden="true"></span>
+                <span className="visually-hidden">Previous</span>
+              </button>
+              <button className="carousel-control-next" type="button" data-bs-target="#featuredArticlesCarousel" data-bs-slide="next">
+                <span className="carousel-control-next-icon" aria-hidden="true"></span>
+                <span className="visually-hidden">Next</span>
+              </button>
+            </div>
           </div>
-          
-          <button className="carousel-control-prev" type="button" data-bs-target="#featuredArticlesCarousel" data-bs-slide="prev">
-            <span className="carousel-control-prev-icon" aria-hidden="true"></span>
-            <span className="visually-hidden">Previous</span>
-          </button>
-          <button className="carousel-control-next" type="button" data-bs-target="#featuredArticlesCarousel" data-bs-slide="next">
-            <span className="carousel-control-next-icon" aria-hidden="true"></span>
-            <span className="visually-hidden">Next</span>
-          </button>
+
+          {/* Right-side article list */}
+          <div className="col-12 col-lg-5">
+            <div className="list-group">
+              {featuredArticles.map(article => (
+                <Link
+                  key={article.id}
+                  to={`/articles/${article.id}`}
+                  className="list-group-item list-group-item-action"
+                >
+                  <h5 className="mb-1">{article.title}</h5>
+                  <p className="mb-1 text-muted small">{article.excerpt}</p>
+                  <small className="text-muted">
+                    {article.date} - {article.author}
+                  </small>
+                </Link>
+              ))}
+            </div>
+          </div>
         </div>
       </section>
       
@@ -208,7 +234,7 @@ const Home = () => {
         </div>
         <div className="row">
           {recentArticles.map(article => (
-            <div key={article.id} className="col-12 col-md-6 col-lg-4">
+            <div key={article.id} className="col-12 col-md-6 col-lg-4 d-flex">
               <ArticleCard {...article} />
             </div>
           ))}
