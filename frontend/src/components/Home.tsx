@@ -23,8 +23,8 @@ const ArticleCard = ({ id, title, excerpt, date, author, tags, views }: {
           </Link>
         </h3>
         <p className="card-text">{excerpt}</p>
-        <div className="d-flex justify-content-between text-muted small">
-          <div>
+        <div className="d-flex flex-wrap justify-content-between text-muted small">
+          <div className="mb-2 mb-md-0">
             <span className="me-3">
               <FontAwesomeIcon icon={faCalendarAlt} className="me-1" />
               {date}
@@ -61,19 +61,22 @@ const FeaturedArticleSlide = ({ article }: { article: any }) => {
       }}>
       </div>
       <div className="card-img-overlay d-flex flex-column justify-content-end">
-        <h2 className="card-title mb-2">
+        <h2 className="card-title mb-2 fs-3 fs-md-2">
           <Link to={`/articles/${article.id}`} className="text-white text-decoration-none">
             {article.title}
           </Link>
         </h2>
-        <p className="card-text mb-3">{article.excerpt}</p>
-        <div className="d-flex justify-content-between text-light small">
-          <div>
+        <p className="card-text mb-3 d-none d-md-block">{article.excerpt}</p>
+        <p className="card-text mb-3 d-block d-md-none">
+          {article.excerpt.length > 60 ? article.excerpt.substring(0, 60) + '...' : article.excerpt}
+        </p>
+        <div className="d-flex flex-wrap justify-content-between text-light small">
+          <div className="mb-1 mb-md-0">
             <span className="me-3">
               <FontAwesomeIcon icon={faCalendarAlt} className="me-1" />
               {article.date}
             </span>
-            <span className="me-3">
+            <span className="me-3 d-none d-sm-inline-block">
               <FontAwesomeIcon icon={faUser} className="me-1" />
               {article.author}
             </span>
@@ -205,7 +208,7 @@ const Home = () => {
         </div>
         <div className="row">
           {recentArticles.map(article => (
-            <div key={article.id} className="col-12">
+            <div key={article.id} className="col-12 col-md-6 col-lg-4">
               <ArticleCard {...article} />
             </div>
           ))}

@@ -4,8 +4,8 @@
   font-weight: 400;
 
   color-scheme: light dark;
-  color: rgba(255, 255, 255, 0.87);
-  background-color: #242424;
+  color: #213547;
+  background-color: #ffffff;
 
   font-synthesis: none;
   text-rendering: optimizeLegibility;
@@ -15,24 +15,43 @@
 
 a {
   font-weight: 500;
-  color: #646cff;
+  color: #0d6efd;
   text-decoration: inherit;
 }
 a:hover {
-  color: #535bf2;
+  color: #0a58ca;
 }
 
 body {
   margin: 0;
-  display: flex;
-  place-items: center;
   min-width: 320px;
   min-height: 100vh;
+  overflow-x: hidden; /* 防止水平滾動 */
+}
+
+img {
+  max-width: 100%;
+  height: auto;
 }
 
 h1 {
-  font-size: 3.2em;
-  line-height: 1.1;
+  font-size: 2.5rem;
+  line-height: 1.2;
+}
+
+h2 {
+  font-size: 2rem;
+  line-height: 1.3;
+}
+
+h3 {
+  font-size: 1.75rem;
+  line-height: 1.4;
+}
+
+h4 {
+  font-size: 1.5rem;
+  line-height: 1.4;
 }
 
 button {
@@ -54,15 +73,42 @@ button:focus-visible {
   outline: 4px auto -webkit-focus-ring-color;
 }
 
-@media (prefers-color-scheme: light) {
-  :root {
-    color: #213547;
-    background-color: #ffffff;
+/* 移動端優化 */
+@media (max-width: 768px) {
+  h1 {
+    font-size: 2rem;
   }
-  a:hover {
-    color: #747bff;
+  
+  h2 {
+    font-size: 1.75rem;
   }
-  button {
-    background-color: #f9f9f9;
+  
+  h3 {
+    font-size: 1.5rem;
+  }
+  
+  h4 {
+    font-size: 1.25rem;
+  }
+  
+  .container {
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+}
+
+/* 平板優化 */
+@media (min-width: 769px) and (max-width: 992px) {
+  .card {
+    margin-bottom: 1rem;
+  }
+}
+
+/* 觸摸設備優化 */
+@media (hover: none) {
+  a:hover, button:hover {
+    /* 觸摸設備上停用懸停效果 */
+    transform: none !important;
+    box-shadow: none !important;
   }
 }

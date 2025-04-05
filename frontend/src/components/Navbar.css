@@ -1,12 +1,22 @@
 /* 橫向下拉選單樣式 */
 .dropdown-menu-horizontal {
-  width: auto;
-  min-width: 450px;
-  padding: 0.5rem;
+  /* 移除 width: 100% 這會導致它使用整個視窗寬度 */
+  position: relative;
+  padding: 0.5rem 0;
+  z-index: 1030;
+  box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+  background-color: #f8f9fa;
+  border-radius: 0;
+  border-left: 0;
+  border-right: 0;
+  margin: 0;
+  overflow-x: hidden;
 }
 
 .horizontal-dropdown-content {
-  width: 100%;
+  margin: 0 auto;
+  padding: 0 15px;
+  box-sizing: border-box;
 }
 
 .dropdown-header {
@@ -21,21 +31,28 @@
 .horizontal-items {
   display: flex;
   flex-wrap: wrap;
-  justify-content: space-around;
+  justify-content: space-evenly;
   padding: 0.5rem;
+  margin: 0 auto;
+  box-sizing: border-box;
 }
 
 .horizontal-items .dropdown-item {
+  flex: 0 0 auto;
   width: auto;
+  min-width: 80px;
+  max-width: 120px;
   text-align: center;
-  padding: 0.75rem;
+  padding: 0.5rem;
   margin: 0.25rem;
   border-radius: 0.25rem;
-  transition: background-color 0.3s;
+  transition: all 0.3s;
 }
 
 .horizontal-items .dropdown-item:hover {
-  background-color: #f8f9fa;
+  background-color: #e9ecef;
+  transform: translateY(-2px);
+  box-shadow: 0 3px 5px rgba(0, 0, 0, 0.1);
 }
 
 /* 標籤圖標樣式 */
@@ -49,6 +66,44 @@
   margin-bottom: 0.5rem;
   font-weight: bold;
   color: white;
+}
+
+/* 小工具圖標樣式 */
+.tool-icon {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 8px;
+  margin-bottom: 0.5rem;
+  color: white;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.calculator-icon {
+  background: linear-gradient(135deg, #4CAF50, #2E7D32);
+}
+
+.code-icon {
+  background: linear-gradient(135deg, #3949AB, #1A237E);
+}
+
+.unit-icon {
+  background: linear-gradient(135deg, #FF9800, #E65100);
+}
+
+.currency-icon {
+  background: linear-gradient(135deg, #00BCD4, #006064);
+}
+
+.gas-icon {
+  background: linear-gradient(135deg, #F44336, #B71C1C);
+}
+
+.horizontal-items .dropdown-item:hover .tool-icon {
+  transform: scale(1.1);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
 }
 
 .react-icon {
@@ -71,27 +126,72 @@
   background-color: #6cc24a;
 }
 
-/* 確保下拉選單在適當位置顯示 */
+/* 確保下拉選單在適當位置顯示並且main區域跟著移動 */
+.navbar {
+  position: relative;
+  z-index: 1031;
+}
+
 .navbar .nav-item.dropdown {
   position: static;
 }
 
+/* 修改下拉選單定位 */
 .navbar .dropdown-menu-horizontal {
   position: absolute;
-  left: 50%;
-  transform: translateX(-50%);
+  left: 0;
+  right: 0;
+  transform: none;
   margin-top: 0;
+  border-radius: 0;
+  border-left: 0;
+  border-right: 0;
+  /* 確保寬度與導航欄一致 */
+  width: 100%;
+}
+
+/* 添加下拉選單容器空間樣式 */
+.dropdown-menu-space {
+  height: 0;
+  overflow: hidden;
+  transition: height 0.3s ease-in-out;
+  width: 100%;
+  background-color: #f8f9fa;
+  border-bottom: 1px solid #dee2e6;
+}
+
+.dropdown-menu-space.show {
+  height: 180px; /* 根據實際下拉選單高度調整 */
+}
+
+/* 確保下拉選單內容與容器寬度匹配 */
+.container .dropdown-menu-horizontal .horizontal-dropdown-content {
+  max-width: 100%;
+  padding-left: 0;
+  padding-right: 0;
+}
+
+/* 下拉箭頭動畫效果 */
+.dropdown-toggle::after {
+  transition: transform 0.3s ease;
+  display: inline-block;
+}
+
+.dropdown-toggle.show::after {
+  transform: rotate(-180deg);
 }
 
 /* 響應式設計 */
 @media (max-width: 992px) {
-  .dropdown-menu-horizontal {
-    min-width: 300px;
-  }
-  
   .horizontal-items .dropdown-item {
     padding: 0.5rem;
     margin: 0.15rem;
+    min-width: 70px;
+    max-width: 100px;
+  }
+  
+  .dropdown-menu-space.show {
+    height: 200px; /* 在中等屏幕上可能需要更多空間 */
   }
 }
 
@@ -99,15 +199,17 @@
   .dropdown-menu-horizontal {
     position: static !important;
     transform: none !important;
-    min-width: 100%;
+    box-shadow: none;
   }
   
   .horizontal-items {
     flex-direction: column;
+    align-items: center;
   }
   
   .horizontal-items .dropdown-item {
     width: 100%;
+    max-width: 100%;
     display: flex;
     flex-direction: row;
     align-items: center;
@@ -126,5 +228,9 @@
     height: 28px;
     margin-right: 0.5rem;
     margin-bottom: 0 !important;
+  }
+  
+  .dropdown-menu-space.show {
+    height: 320px; /* 在小屏幕上垂直顯示時需要更多空間 */
   }
 }
