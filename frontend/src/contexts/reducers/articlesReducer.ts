@@ -1,43 +1,37 @@
 /**
  * 處理文章數據的 reducer
  */
+import { Article } from '../../types/api';
 import { Action, ActionType } from '../../types/state';
 
-// 文章狀態接口
+// State structure for articles
 export interface ArticlesState {
-  list: any[];
-  current: any | null;
+  items: Article[];
+  currentArticle: Article | null;
   loading: boolean;
   error: string | null;
-  lastFetched: number | null;
-  filters: {
-    category_id?: number | string;
-    tag_id?: number | string;
-    search?: string;
-    [key: string]: any;
-  };
   pagination: {
     page: number;
     pageSize: number;
     total: number;
     totalPages: number;
   };
+  lastFetched: number | null; // Add this property
 }
 
-// 初始文章狀態
+// Initial state
 export const initialArticlesState: ArticlesState = {
-  list: [],
-  current: null,
+  items: [],
+  currentArticle: null,
   loading: false,
   error: null,
-  lastFetched: null, // 最後獲取時間，用於緩存控制
-  filters: {},
   pagination: {
     page: 1,
     pageSize: 10,
     total: 0,
     totalPages: 0
-  }
+  },
+  lastFetched: null // Initialize with null
 };
 
 // 緩存有效時間（毫秒）: 5分鐘
@@ -51,111 +45,128 @@ export const shouldFetchArticles = (state: ArticlesState): boolean => {
   }
   
   // 如果沒有數據，但有錯誤，說明之前的獲取失敗了，需要重試
-  if (state.list.length === 0 && state.error) {
+  if (state.items.length === 0 && state.error) {
     return true;
   }
   
   return false;
 };
 
-// 文章 reducer
+// Articles reducer
 export const articlesReducer = (state: ArticlesState = initialArticlesState, action: Action): ArticlesState => {
   switch (action.type) {
+    // Fetching multiple articles
     case ActionType.FETCH_ARTICLES_REQUEST:
       return {
         ...state,
         loading: true,
         error: null
       };
-    
     case ActionType.FETCH_ARTICLES_SUCCESS:
       return {
         ...state,
-        list: action.payload.data || [],
+        items: action.payload.items,
+        pagination: action.payload.pagination,
         loading: false,
         error: null,
-        lastFetched: Date.now(),
-        pagination: {
-          page: action.payload.page || 1,
-          pageSize: action.payload.page_size || 10,
-          total: action.payload.total || 0,
-          totalPages: action.payload.total_pages || 0
-        }
+        lastFetched: Date.now() // Update lastFetched when articles are successfully fetched
       };
-    
     case ActionType.FETCH_ARTICLES_FAILURE:
       return {
         ...state,
         loading: false,
-        error: action.payload || '獲取文章列表失敗'
+        error: action.payload
       };
-    
+
+    // Fetching a single article
     case ActionType.FETCH_ARTICLE_REQUEST:
       return {
         ...state,
-        current: null,
+        currentArticle: null,
         loading: true,
         error: null
       };
-      
     case ActionType.FETCH_ARTICLE_SUCCESS:
       return {
         ...state,
-        current: action.payload,
+        currentArticle: action.payload,
         loading: false,
         error: null
       };
-      
     case ActionType.FETCH_ARTICLE_FAILURE:
       return {
         ...state,
         loading: false,
-        error: action.payload || '獲取文章詳情失敗'
+        error: action.payload
       };
-    
+
+    // Creating an article
+    case ActionType.CREATE_ARTICLE_REQUEST:
+      return {
+        ...state,
+        loading: true,
+        error: null
+      };
     case ActionType.CREATE_ARTICLE_SUCCESS:
       return {
         ...state,
-        list: [action.payload, ...state.list],
-        current: action.payload,
+        items: [action.payload, ...state.items],
+        currentArticle: action.payload,
         loading: false,
         error: null
       };
-    
+    case ActionType.CREATE_ARTICLE_FAILURE:
+      return {
+        ...state,
+        loading: false,
+        error: action.payload
+      };
+
+    // Updating an article
+    case ActionType.UPDATE_ARTICLE_REQUEST:
+      return {
+        ...state,
+        loading: true,
+        error: null
+      };
     case ActionType.UPDATE_ARTICLE_SUCCESS:
       return {
         ...state,
-        list: state.list.map(article => 
-          article.id === action.payload.id ? action.payload : article
+        items: state.items.map(item => 
+          item.id === action.payload.id ? action.payload : item
         ),
-        current: action.payload,
+        currentArticle: action.payload,
         loading: false,
         error: null
       };
-    
+    case ActionType.UPDATE_ARTICLE_FAILURE:
+      return {
+        ...state,
+        loading: false,
+        error: action.payload
+      };
+
+    // Deleting an article
+    case ActionType.DELETE_ARTICLE_REQUEST:
+      return {
+        ...state,
+        loading: true,
+        error: null
+      };
     case ActionType.DELETE_ARTICLE_SUCCESS:
       return {
         ...state,
-        list: state.list.filter(article => article.id !== action.payload),
-        current: state.current?.id === action.payload ? null : state.current,
+        items: state.items.filter(item => item.id !== action.payload),
         loading: false,
         error: null
       };
-    
-    case ActionType.SET_ARTICLE_FILTERS:
+    case ActionType.DELETE_ARTICLE_FAILURE:
       return {
         ...state,
-        filters: {
-          ...state.filters,
-          ...action.payload
-        },
-        // 設置新的篩選條件時，重置分頁
-        pagination: {
-          ...state.pagination,
-          page: 1
-        }
+        loading: false,
+        error: action.payload
       };
-    
+
     default:
       return state;
   }

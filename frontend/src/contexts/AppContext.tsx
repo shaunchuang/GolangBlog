@@ -2,7 +2,7 @@
  * 應用全局狀態管理 Context
  */
 import React, { createContext, useReducer, useContext, ReactNode } from 'react';
-import { AppState, Action, ActionType } from '../types/state';
+import { AppState, Action } from '../types/state';
 import { authReducer, initialAuthState } from './reducers/authReducer';
 import { articlesReducer, initialArticlesState } from './reducers/articlesReducer';
 import { tagsReducer, initialTagsState } from './reducers/tagsReducer';
@@ -20,9 +20,17 @@ export const initialAppState: AppState = {
   ui: initialUiState
 };
 
+// Define the context value type that combines state and dispatch
+export interface AppContextValue {
+  state: AppState;
+  dispatch: React.Dispatch<Action>;
+}
+
 // 創建 Context
-export const AppStateContext = createContext<AppState>(initialAppState);
-export const AppDispatchContext = createContext<React.Dispatch<Action>>(() => null);
+export const AppContext = createContext<AppContextValue>({
+  state: initialAppState,
+  dispatch: () => null
+});
 
 // 組合各個領域的 reducer
 const rootReducer = (state: AppState, action: Action): AppState => {
@@ -37,35 +45,25 @@ const rootReducer = (state: AppState, action: Action): AppState => {
 };
 
 // Context Provider 組件
-interface AppStateProviderProps {
+interface AppProviderProps {
   children: ReactNode;
 }
 
-export const AppStateProvider: React.FC<AppStateProviderProps> = ({ children }) => {
+export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
   const [state, dispatch] = useReducer(rootReducer, initialAppState);
 
   return (
-    <AppStateContext.Provider value={state}>
-      <AppDispatchContext.Provider value={dispatch}>
-        {children}
-      </AppDispatchContext.Provider>
-    </AppStateContext.Provider>
+    <AppContext.Provider value={{ state, dispatch }}>
+      {children}
+    </AppContext.Provider>
   );
 };
 
-// 自定義 hooks 方便在組件中使用狀態和 dispatch
-export const useAppState = () => {
-  const context = useContext(AppStateContext);
+// 自定義 hook 方便在組件中使用 Context
+export const useAppContext = () => {
+  const context = useContext(AppContext);
   if (context === undefined) {
-    throw new Error('useAppState 必須在 AppStateProvider 內使用');
-  }
-  return context;
-};
-
-export const useAppDispatch = () => {
-  const context = useContext(AppDispatchContext);
-  if (context === undefined) {
-    throw new Error('useAppDispatch 必須在 AppStateProvider 內使用');
+    throw new Error('useAppContext 必須在 AppProvider 內使用');
   }
   return context;
 };

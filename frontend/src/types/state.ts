@@ -2,7 +2,6 @@
  * 應用狀態類型定義
  */
 
-import { User } from './api';
 import { AuthState } from '../contexts/reducers/authReducer';
 import { ArticlesState } from '../contexts/reducers/articlesReducer';
 import { TagsState } from '../contexts/reducers/tagsReducer';
@@ -20,18 +19,19 @@ export interface AppState {
   ui: UiState;
 }
 
-// 所有可能的操作類型枚舉
+// Define application action types
 export enum ActionType {
-  // 認證相關
+  // Auth actions
   LOGIN_REQUEST = 'LOGIN_REQUEST',
   LOGIN_SUCCESS = 'LOGIN_SUCCESS',
   LOGIN_FAILURE = 'LOGIN_FAILURE',
+  LOGOUT = 'LOGOUT',
   REGISTER_REQUEST = 'REGISTER_REQUEST',
   REGISTER_SUCCESS = 'REGISTER_SUCCESS',
   REGISTER_FAILURE = 'REGISTER_FAILURE',
-  LOGOUT = 'LOGOUT',
+  UPDATE_USER = 'UPDATE_USER',
   
-  // 文章相關
+  // Article actions
   FETCH_ARTICLES_REQUEST = 'FETCH_ARTICLES_REQUEST',
   FETCH_ARTICLES_SUCCESS = 'FETCH_ARTICLES_SUCCESS',
   FETCH_ARTICLES_FAILURE = 'FETCH_ARTICLES_FAILURE',
@@ -47,32 +47,13 @@ export enum ActionType {
   DELETE_ARTICLE_REQUEST = 'DELETE_ARTICLE_REQUEST',
   DELETE_ARTICLE_SUCCESS = 'DELETE_ARTICLE_SUCCESS',
   DELETE_ARTICLE_FAILURE = 'DELETE_ARTICLE_FAILURE',
-  SET_ARTICLE_FILTERS = 'SET_ARTICLE_FILTERS',
   
-  // 標籤相關
-  FETCH_TAGS_REQUEST = 'FETCH_TAGS_REQUEST',
-  FETCH_TAGS_SUCCESS = 'FETCH_TAGS_SUCCESS',
-  FETCH_TAGS_FAILURE = 'FETCH_TAGS_FAILURE',
-  
-  // 分類相關
-  FETCH_CATEGORIES_REQUEST = 'FETCH_CATEGORIES_REQUEST',
-  FETCH_CATEGORIES_SUCCESS = 'FETCH_CATEGORIES_SUCCESS',
-  FETCH_CATEGORIES_FAILURE = 'FETCH_CATEGORIES_FAILURE',
-  
-  // 語言相關
-  FETCH_LANGUAGES_REQUEST = 'FETCH_LANGUAGES_REQUEST',
-  FETCH_LANGUAGES_SUCCESS = 'FETCH_LANGUAGES_SUCCESS',
-  FETCH_LANGUAGES_FAILURE = 'FETCH_LANGUAGES_FAILURE',
-  SET_LANGUAGE = 'SET_LANGUAGE',
-  
-  // UI 相關
-  TOGGLE_DARK_MODE = 'TOGGLE_DARK_MODE',
-  TOGGLE_SIDEBAR = 'TOGGLE_SIDEBAR',
-  ADD_ALERT = 'ADD_ALERT',
-  DISMISS_ALERT = 'DISMISS_ALERT'
+  // Other action types as needed
+  FETCH_TAGS = 'FETCH_TAGS',
+  FETCH_CATEGORIES = 'FETCH_CATEGORIES'
 }
 
-// 通用 Action 接口
+// Define base action interface
 export interface Action {
   type: ActionType;
   payload?: any;
@@ -85,3 +66,6 @@ export type TagsAction = Action;
 export type CategoriesAction = Action;
 export type LanguagesAction = Action;
 export type UiAction = Action;
+
+// Remove the circular import
+// export { AppState } from '../contexts/AppContext';

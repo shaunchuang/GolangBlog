@@ -21,9 +21,12 @@ export interface ApiResponse<T> {
 // 標籤相關接口
 export interface Tag {
   id: number;
+  name: string;
+  slug: string;
+  description?: string;
+  article_count?: number;
   created_at: string;
   updated_at: string;
-  translations: TagTranslation[];
 }
 
 export interface TagTranslation {
@@ -37,10 +40,12 @@ export interface TagTranslation {
 // 分類相關接口
 export interface Category {
   id: number;
-  parent_id: number | null;
+  name: string;
+  slug: string;
+  description?: string;
+  article_count?: number;
   created_at: string;
   updated_at: string;
-  translations: CategoryTranslation[];
 }
 
 export interface CategoryTranslation {
@@ -55,17 +60,20 @@ export interface CategoryTranslation {
 // 文章相關接口
 export interface Article {
   id: number;
-  user_id: number;
-  status: string;
-  featured_image: string;
+  title: string;
+  slug: string;
+  content: string;
+  excerpt?: string;
+  featured_image?: string;
+  status: 'draft' | 'published' | 'archived';
   view_count: number;
-  published_at: string | null;
+  category_id?: number;
+  category?: Category;
+  tags?: Tag[];
+  author?: User;
   created_at: string;
   updated_at: string;
-  translations: ArticleTranslation[];
-  tags: Tag[];
-  categories: Category[];
-  user: User;
+  published_at?: string;
 }
 
 export interface ArticleTranslation {
@@ -86,13 +94,13 @@ export interface User {
   id: number;
   username: string;
   email: string;
-  first_name: string;
-  last_name: string;
   role: string;
-  status: string;
-  avatar: string;
   created_at: string;
   updated_at: string;
+  first_name?: string;
+  last_name?: string;
+  status?: string;
+  avatar?: string;
 }
 
 // 認證相關接口
@@ -144,4 +152,10 @@ export interface Image {
   usage: string;
   created_at: string;
   updated_at: string;
+}
+
+// API 錯誤響應
+export interface ApiError {
+  error: string;
+  status: number;
 }
