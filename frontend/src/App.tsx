@@ -6,6 +6,9 @@ import Home from './components/Home';
 import News from './pages/News';
 import LifeLogs from './pages/LifeLogs';
 import Categories from './pages/Categories';
+import LoanCalculator from './pages/tools/LoanCalculator';
+import Base64 from './pages/tools/Base64';
+import UnitConverter from './pages/tools/UnitConverter';
 
 function App() {
   return (
@@ -22,6 +25,13 @@ function App() {
               <Route path="/news" element={<News />} />
               <Route path="/life-logs" element={<LifeLogs />} />
               <Route path="/categories" element={<Categories />} />
+              
+              {/* 工具頁面路由 */}
+              <Route path="/tools/loan-calculator" element={<LoanCalculator />} />
+              <Route path="/tools/base64" element={<Base64 />} />
+              <Route path="/tools/unit-converter" element={<UnitConverter />} />
+              <Route path="/tools/currency" element={<div><h2>匯率換算工具</h2></div>} />
+              <Route path="/tools/gas-price" element={<div><h2>油價資訊工具</h2></div>} />
             </Routes>
           </div>
         </main>
