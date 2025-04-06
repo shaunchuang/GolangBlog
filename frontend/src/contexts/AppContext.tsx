@@ -9,7 +9,6 @@ import { tagsReducer, initialTagsState } from './reducers/tagsReducer';
 import { categoriesReducer, initialCategoriesState } from './reducers/categoriesReducer';
 import { languagesReducer, initialLanguagesState } from './reducers/languagesReducer';
 import { uiReducer, initialUiState } from './reducers/uiReducer';
-import { authService } from '../services/authService';
 
 // 創建初始應用狀態
 export const initialAppState: AppState = {

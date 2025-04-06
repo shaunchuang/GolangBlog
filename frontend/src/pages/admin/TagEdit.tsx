@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { tagService } from '../../services/tagService';
-import { Tag } from '../../types/api';
 
 type TagFormData = {
   name: string;

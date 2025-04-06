@@ -13,6 +13,7 @@ export interface PaginatedResponse<T> {
 
 // 通用API響應接口
 export interface ApiResponse<T> {
+  data: T;
   message?: string;
   error?: string;
   [key: string]: any;
@@ -40,14 +41,18 @@ export interface TagTranslation {
 // 分類相關接口
 export interface Category {
   id: number;
+  parent_id: number | null;
+  parent?: Category;
   name: string;
   slug: string;
   description?: string;
-  article_count?: number;
   created_at: string;
   updated_at: string;
+  article_count?: number;
+  translations?: CategoryTranslation[];
 }
 
+// 分類翻譯相關接口
 export interface CategoryTranslation {
   id: number;
   category_id: number;

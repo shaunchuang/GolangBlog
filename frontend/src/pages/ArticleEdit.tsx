@@ -122,12 +122,6 @@ const ArticleEdit = () => {
     setFormData(prev => ({ ...prev, category_id: categoryId }));
   };
 
-  // 處理標籤選擇變更
-  const handleTagChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const selectedOptions = Array.from(e.target.selectedOptions, option => parseInt(option.value));
-    setFormData(prev => ({ ...prev, tag_ids: selectedOptions }));
-  };
-
   // 從標題自動生成 slug
   const generateSlugFromTitle = () => {
     const slug = formData.title

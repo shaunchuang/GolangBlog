@@ -85,7 +85,13 @@ export enum ActionType {
   
   // Legacy action types - kept for backward compatibility
   FETCH_TAGS = 'FETCH_TAGS',
-  FETCH_CATEGORIES = 'FETCH_CATEGORIES'
+  FETCH_CATEGORIES = 'FETCH_CATEGORIES',
+
+  // Add missing language action types
+  FETCH_LANGUAGES_REQUEST = 'FETCH_LANGUAGES_REQUEST',
+  FETCH_LANGUAGES_SUCCESS = 'FETCH_LANGUAGES_SUCCESS',
+  FETCH_LANGUAGES_FAILURE = 'FETCH_LANGUAGES_FAILURE',
+  SET_LANGUAGE = 'SET_LANGUAGE'
 }
 
 // Define base action interface
