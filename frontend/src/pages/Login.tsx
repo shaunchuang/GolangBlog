@@ -31,6 +31,10 @@ const Login = () => {
 
       // 呼叫登入 API
       const response = await authService.login({ email, password });
+      
+      console.log('登入成功，響應數據:', response);
+      console.log('用戶信息:', response.user);
+      console.log('令牌:', response.token);
 
       // 登入成功，更新 reducer 狀態
       dispatch({
@@ -40,9 +44,16 @@ const Login = () => {
           token: response.token
         }
       });
+      
+      console.log('已派發 LOGIN_SUCCESS 事件');
 
       // 導航到用戶原本嘗試訪問的頁面，或首頁
       navigate(from, { replace: true });
+      
+      // 添加一個短暫延遲後刷新頁面，確保狀態更新
+      setTimeout(() => {
+        window.location.reload();
+      }, 100);
     } catch (err: any) {
       // 登入失敗，更新錯誤狀態
       const errorMessage = err.response?.data?.error || '登入失敗，請檢查您的憑證';

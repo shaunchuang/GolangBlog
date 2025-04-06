@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { useAppContext } from '../contexts/AppContext';
-import { ActionType } from '../types/state';
 import { articleService } from '../services/articleService';
 import { Article } from '../types/api';
 

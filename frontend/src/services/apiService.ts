@@ -30,9 +30,21 @@ apiClient.interceptors.request.use(
 // 響應攔截器 - 在每個響應返回後處理
 apiClient.interceptors.response.use(
   (response) => {
+    // 添加詳細的成功響應日誌，幫助調試
+    console.log(`API 響應 [${response.config.method?.toUpperCase()}] ${response.config.url}:`, {
+      status: response.status,
+      data: response.data
+    });
     return response;
   },
   (error) => {
+    // 添加詳細的錯誤日誌
+    console.error(`API 錯誤 [${error.config?.method?.toUpperCase()}] ${error.config?.url}:`, {
+      status: error.response?.status,
+      data: error.response?.data,
+      message: error.message
+    });
+
     // 處理常見的錯誤情況
     if (error.response) {
       // 服務器返回錯誤狀態碼

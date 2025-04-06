@@ -9,7 +9,7 @@ const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080
 export const API_CONFIG = {
   baseURL: API_BASE_URL,
   timeout: 10000, // 請求超時時間(毫秒)
-  withCredentials: true, // 允許跨域請求攜帶 cookies
+  withCredentials: false, // 修改為 false，因為我們使用 JWT 而不是 cookies
   headers: {
     'Content-Type': 'application/json',
     'Accept': 'application/json'

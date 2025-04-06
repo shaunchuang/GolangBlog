@@ -3,7 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { articleService } from '../services/articleService';
 import { tagService } from '../services/tagService';
 import { categoryService } from '../services/categoryService';
-import { Article, Tag, Category } from '../types/api';
+import { Tag, Category } from '../types/api';
 
 type ArticleFormData = {
   title: string;
@@ -205,7 +205,7 @@ const ArticleEdit = () => {
       // 準備提交的數據
       const articleData = {
         ...formData,
-        // 確保 tag_ids 是一個數組
+        // 碮保 tag_ids 是一個數組
         tag_ids: formData.tag_ids || []
       };
       
@@ -396,7 +396,7 @@ const ArticleEdit = () => {
                       </div>
                     )}
                     
-                    <form onSubmit={handleCreateTag}>
+                    <div> 
                       <div className="mb-2">
                         <label htmlFor="new-tag-name" className="form-label">標籤名稱</label>
                         <input
@@ -446,14 +446,15 @@ const ArticleEdit = () => {
                       
                       <div className="d-flex justify-content-end">
                         <button
-                          type="submit"
+                          type="button" 
                           className="btn btn-sm btn-success"
                           disabled={creatingTag}
+                          onClick={handleCreateTag} 
                         >
                           {creatingTag ? '創建中...' : '創建並添加'}
                         </button>
                       </div>
-                    </form>
+                    </div>
                   </div>
                 </div>
               )}

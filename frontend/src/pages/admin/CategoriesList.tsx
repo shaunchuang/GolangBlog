@@ -1,7 +1,5 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { useAppContext } from '../../contexts/AppContext';
-import { ActionType } from '../../types/state';
 import { categoryService } from '../../services/categoryService';
 import { Category } from '../../types/api';
 

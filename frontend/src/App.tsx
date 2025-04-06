@@ -10,6 +10,7 @@ import LoanCalculator from './pages/tools/LoanCalculator';
 import Base64 from './pages/tools/Base64';
 import UnitConverter from './pages/tools/UnitConverter';
 import Login from './pages/Login';
+import Register from './pages/Register';
 import Unauthorized from './pages/Unauthorized';
 import ProtectedRoute from './components/ProtectedRoute';
 import ArticlesList from './pages/ArticlesList';
@@ -33,7 +34,16 @@ function App() {
               <Route path="/" element={<Home />} />
               <Route path="/news" element={<News />} />
               <Route path="/login" element={<Login />} />
+              <Route path="/register" element={<Register />} />
               <Route path="/unauthorized" element={<Unauthorized />} />
+              
+              {/* 生活日誌和分類頁面 - 公開 */}
+              <Route path="/life-logs" element={<LifeLogs />} />
+              <Route path="/categories" element={<Categories />} />
+              
+              {/* 文章頁面 - 公開 */}
+              <Route path="/articles" element={<ArticlesList />} />
+              <Route path="/articles/:id" element={<ArticleDetail />} />
               
               {/* 工具頁面路由 - 公開 */}
               <Route path="/tools/loan-calculator" element={<LoanCalculator />} />
@@ -41,28 +51,6 @@ function App() {
               <Route path="/tools/unit-converter" element={<UnitConverter />} />
               <Route path="/tools/currency" element={<div><h2>匯率換算工具</h2></div>} />
               <Route path="/tools/gas-price" element={<div><h2>油價資訊工具</h2></div>} />
-              
-              {/* 需要普通用戶權限的路由 */}
-              <Route path="/articles" element={
-                <ProtectedRoute>
-                  <ArticlesList />
-                </ProtectedRoute>
-              } />
-              <Route path="/articles/:id" element={
-                <ProtectedRoute>
-                  <ArticleDetail />
-                </ProtectedRoute>
-              } />
-              <Route path="/life-logs" element={
-                <ProtectedRoute>
-                  <LifeLogs />
-                </ProtectedRoute>
-              } />
-              <Route path="/categories" element={
-                <ProtectedRoute>
-                  <Categories />
-                </ProtectedRoute>
-              } />
               
               {/* 需要編輯者或管理員權限的路由 */}
               <Route element={<ProtectedRoute allowedRoles={['admin', 'editor']} />}>

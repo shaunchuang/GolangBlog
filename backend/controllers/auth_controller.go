@@ -3,7 +3,9 @@ package controllers
 import (
 	"GolangBlog/config"
 	"GolangBlog/models"
+	"log"
 	"net/http"
+	"os"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -165,7 +167,12 @@ func GetCurrentUser(c *gin.Context) {
 
 // 從環境變數或配置文件獲取 JWT 金鑰
 func getJWTKey() string {
-	// 在實際應用中應從安全的地方獲取 JWT 密鑰
-	// 這裡簡單示例，實際應用中要更安全地處理
-	return "your-secret-jwt-key"
+	// 優先從環境變數獲取 JWT 密鑰
+	jwtKey := os.Getenv("JWT_SECRET_KEY")
+	if jwtKey == "" {
+		// 若環境變數未設置，則使用默認密鑰（僅用於開發環境）
+		jwtKey = "your-secret-jwt-key"
+		log.Println("警告: 使用默認 JWT 密鑰，這不適合生產環境。請設置 JWT_SECRET_KEY 環境變數。")
+	}
+	return jwtKey
 }

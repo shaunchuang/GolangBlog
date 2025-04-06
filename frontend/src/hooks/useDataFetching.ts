@@ -1,8 +1,8 @@
 /**
  * 自定義 Hooks 用於數據獲取和狀態管理
  */
-import { useEffect, useState, useCallback } from 'react';
-import { useAppState, useAppDispatch } from '../contexts/AppContext';
+import { useEffect, useCallback } from 'react';
+import { useAppContext } from '../contexts/AppContext';
 import { ActionType } from '../types/state';
 import { articleService, authService, categoryService, tagService } from '../services';
 import { shouldFetchArticles } from '../contexts/reducers/articlesReducer';
@@ -13,8 +13,8 @@ import { shouldFetchCategories } from '../contexts/reducers/categoriesReducer';
  * 處理用戶認證相關的 hook
  */
 export const useAuth = () => {
-  const dispatch = useAppDispatch();
-  const { auth } = useAppState();
+  const { state, dispatch } = useAppContext();
+  const { auth } = state;
   
   // 登入
   const login = useCallback(async (email: string, password: string) => {
@@ -119,8 +119,8 @@ export const useAuth = () => {
  * 處理文章數據獲取的 hook
  */
 export const useArticles = () => {
-  const dispatch = useAppDispatch();
-  const { articles } = useAppState();
+  const { state, dispatch } = useAppContext();
+  const { articles } = state;
   
   // 獲取文章列表
   const fetchArticles = useCallback(async (params?: any) => {
@@ -128,7 +128,6 @@ export const useArticles = () => {
     
     try {
       const response = await articleService.getArticles({
-        ...articles.filters,
         page: articles.pagination.page,
         page_size: articles.pagination.pageSize,
         ...params
@@ -156,7 +155,7 @@ export const useArticles = () => {
       
       throw error;
     }
-  }, [dispatch, articles.filters, articles.pagination]);
+  }, [dispatch, articles.pagination]);
   
   // 獲取單篇文章
   const fetchArticleById = useCallback(async (id: number | string) => {
@@ -205,12 +204,11 @@ export const useArticles = () => {
   }, [fetchArticles]);
   
   return {
-    articles: articles.list,
-    currentArticle: articles.current,
+    articles: articles.items,
+    currentArticle: articles.currentArticle,
     loading: articles.loading,
     error: articles.error,
     pagination: articles.pagination,
-    filters: articles.filters,
     fetchArticles,
     fetchArticleById,
     setFilters
@@ -221,8 +219,8 @@ export const useArticles = () => {
  * 處理標籤數據獲取的 hook
  */
 export const useTags = () => {
-  const dispatch = useAppDispatch();
-  const { tags } = useAppState();
+  const { state, dispatch } = useAppContext();
+  const { tags } = state;
   
   // 獲取標籤列表
   const fetchTags = useCallback(async (params?: any) => {
@@ -268,8 +266,8 @@ export const useTags = () => {
  * 處理分類數據獲取的 hook
  */
 export const useCategories = () => {
-  const dispatch = useAppDispatch();
-  const { categories } = useAppState();
+  const { state, dispatch } = useAppContext();
+  const { categories } = state;
   
   // 獲取分類列表
   const fetchCategories = useCallback(async (params?: any) => {
@@ -315,8 +313,8 @@ export const useCategories = () => {
  * 處理 UI 狀態的 hook
  */
 export const useUI = () => {
-  const dispatch = useAppDispatch();
-  const { ui } = useAppState();
+  const { state, dispatch } = useAppContext();
+  const { ui } = state;
   
   // 切換深色模式
   const toggleDarkMode = useCallback((value?: boolean) => {

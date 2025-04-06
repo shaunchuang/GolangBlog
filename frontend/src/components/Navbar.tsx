@@ -7,12 +7,14 @@ import {
 } from '@fortawesome/free-solid-svg-icons';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { useEffect, useState, useContext } from 'react';
-import { AppContext, useAppContext } from '../contexts/AppContext';
+import { useEffect, useState } from 'react';
+import { useAppContext } from '../contexts/AppContext';
 import { ActionType } from '../types/state';
+import { authService } from '../services/authService'; // 添加這行導入 authService
 import './Navbar.css'; // 引入自定義 CSS
 
 const Navbar = () => {
+
   const { t, i18n } = useTranslation();
   // Option 1: Use the custom hook (recommended)
   const { state, dispatch } = useAppContext();
@@ -23,16 +25,32 @@ const Navbar = () => {
 
   const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
   const { isAuthenticated, user } = state.auth;
+  
+  // 添加調試日誌
+  console.log('Navbar 渲染 - 認證狀態:', state.auth);
+  console.log('isAuthenticated:', isAuthenticated);
+  console.log('user:', user);
+  console.log('localStorage auth_token:', localStorage.getItem('auth_token'));
 
   // 檢查用戶是否有管理員權限
   const hasAdminAccess = () => {
+    // 恢復原始邏輯：只有 admin 和 editor 角色才能訪問管理功能
+    console.log('檢查用戶角色:', user?.role);
     return user && ['admin', 'editor'].includes(user.role);
   };
 
   // 登出處理函數
   const handleLogout = () => {
+    console.log('執行登出操作');
+    
+    // 調用 authService 清理 localStorage
+    authService.logout();
+    
+    // 更新應用狀態
     dispatch({ type: ActionType.LOGOUT });
-    // 如果需要，可以導航到登入頁面或首頁
+    
+    // 重定向到首頁
+    window.location.href = '/';
   };
 
   const changeLanguage = (lng: string) => {
@@ -189,55 +207,34 @@ const Navbar = () => {
             
             <div className="d-flex align-items-center">
               {/* 用戶認證選項 */}
-              <div className="dropdown me-3">
-                <button
-                  className="btn btn-outline-secondary dropdown-toggle d-flex align-items-center"
-                  type="button"
-                  id="userDropdown"
-                  data-bs-toggle="dropdown"
-                  aria-expanded="false"
-                >
-                  <FontAwesomeIcon icon={isAuthenticated ? faUserCircle : faSignInAlt} className="me-1" />
-                  <span>{isAuthenticated ? (user?.username || '用戶') : '登入/註冊'}</span>
-                </button>
-                <ul className="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
-                  {isAuthenticated ? (
-                    <>
-                      <li className="dropdown-item-text">
-                        <small className="text-muted">以 <strong>{user?.role || '用戶'}</strong> 身份登入</small>
-                      </li>
-                      <li><hr className="dropdown-divider" /></li>
-                      <li>
-                        <Link to="/profile" className="dropdown-item">
-                          <FontAwesomeIcon icon={faUserCircle} className="me-2" />
-                          個人資料
-                        </Link>
-                      </li>
-                      <li>
-                        <button className="dropdown-item" onClick={handleLogout}>
-                          <FontAwesomeIcon icon={faSignOutAlt} className="me-2" />
-                          登出
-                        </button>
-                      </li>
-                    </>
-                  ) : (
-                    <>
-                      <li>
-                        <Link to="/login" className="dropdown-item">
-                          <FontAwesomeIcon icon={faSignInAlt} className="me-2" />
-                          登入
-                        </Link>
-                      </li>
-                      <li>
-                        <Link to="/register" className="dropdown-item">
-                          <FontAwesomeIcon icon={faUserCircle} className="me-2" />
-                          註冊
-                        </Link>
-                      </li>
-                    </>
-                  )}
-                </ul>
-              </div>
+              {isAuthenticated ? (
+                <div className="d-flex align-items-center me-3">
+                  <span className="me-3">
+                    <FontAwesomeIcon icon={faUserCircle} className="me-2" />
+                    歡迎，<strong>{user?.username || '用戶'}</strong>
+                    <small className="text-muted ms-2">({user?.role || '用戶'})</small>
+                  </span>
+                  <button 
+                    className="btn btn-outline-danger"
+                    onClick={handleLogout}
+                    title="登出"
+                  >
+                    <FontAwesomeIcon icon={faSignOutAlt} className="me-1" />
+                    登出
+                  </button>
+                </div>
+              ) : (
+                <div className="d-flex me-3">
+                  <Link to="/login" className="btn btn-outline-primary me-2">
+                    <FontAwesomeIcon icon={faSignInAlt} className="me-1" />
+                    登入
+                  </Link>
+                  <Link to="/register" className="btn btn-outline-secondary">
+                    <FontAwesomeIcon icon={faUserCircle} className="me-1" />
+                    註冊
+                  </Link>
+                </div>
+              )}
               
               {/* 語言切換選項 */}
               <div className="dropdown">
