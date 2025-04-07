@@ -1,4 +1,4 @@
-name: Build and Push Docker Images
+name: Build, Push and Deploy to k3s
 
 on:
   push:
@@ -6,7 +6,7 @@ on:
       - main
 
 jobs:
-  build-and-push:
+  build-push-deploy:
     runs-on: ubuntu-latest
 
     steps:
@@ -36,3 +36,20 @@ jobs:
         context: ./backend
         push: true
         tags: ghcr.io/${{ secrets.GHCR_USERNAME }}/backend:latest
+
+    # 新增：設定 KUBECONFIG 環境變數
+    - name: Decode and set kubeconfig
+      run: |
+        echo "${{ secrets.KUBECONFIG }}" | base64 -d > kubeconfig
+        export KUBECONFIG=$PWD/kubeconfig
+        kubectl config use-context default
+
+    - name: Set backend deployment image
+      run: |
+        export KUBECONFIG=$PWD/kubeconfig
+        kubectl set image deployment/backend backend=ghcr.io/${{ secrets.GHCR_USERNAME }}/backend:latest --namespace=default
+
+    - name: Set frontend deployment image
+      run: |
+        export KUBECONFIG=$PWD/kubeconfig
+        kubectl set image deployment/frontend frontend=ghcr.io/${{ secrets.GHCR_USERNAME }}/frontend:latest --namespace=default
