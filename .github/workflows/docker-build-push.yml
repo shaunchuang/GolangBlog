@@ -42,7 +42,21 @@ jobs:
       run: |
         echo "${{ secrets.KUBECONFIG }}" | base64 -d > kubeconfig
         export KUBECONFIG=$PWD/kubeconfig
-        kubectl config use-context default
+
+    - name: Generate backend-env Secret YAML
+      run: |
+        chmod +x scripts/gen-backend-secret.sh
+        ./scripts/gen-backend-secret.sh
+     
+    - name: Debug backend-env.yaml
+      run: |
+        echo "🔍 backend-env.yaml 內容："
+        cat backend-env.yaml
+
+    - name: Apply backend-env Secret to k3s
+      run: |
+        export KUBECONFIG=$PWD/kubeconfig
+        kubectl apply -f backend-env.yaml --insecure-skip-tls-verify --validate=false
 
     - name: Set backend deployment image
       run: |
