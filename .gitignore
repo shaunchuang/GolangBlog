@@ -1,19 +1,10 @@
 # Backend
-/backend/locales/*
-!/backend/locales/en/messages.json
-!/backend/locales/zh/messages.json
-/backend/go.sum
 /backend/*.log
 /backend/*.tmp
 
 # Frontend
 /frontend/node_modules/
 /frontend/dist/
-/frontend/public/locales/*
-!/frontend/public/locales/en/translation.json
-!/frontend/public/locales/zh/translation.json
-/frontend/.env
-/frontend/.env.*
 
 # macOS
 .DS_Store
