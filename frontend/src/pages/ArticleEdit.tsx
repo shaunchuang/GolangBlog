@@ -4,6 +4,8 @@ import { articleService } from '../services/articleService';
 import { tagService } from '../services/tagService';
 import { categoryService } from '../services/categoryService';
 import { Tag, Category } from '../types/api';
+import Quill from 'quill'; // 引入 Quill
+import 'quill/dist/quill.snow.css'; // 引入 Quill 的樣式
 
 type ArticleFormData = {
   title: string;
@@ -108,6 +110,55 @@ const ArticleEdit = () => {
     
     loadArticle();
     loadOptions();
+  }, [id, isEditing]);
+
+  // 初始化 Quill 編輯器
+  useEffect(() => {
+    const quill = new Quill('#editor', {
+      theme: 'snow', // 使用 Snow 主題
+      modules: {
+        toolbar: [
+          [{ header: [1, 2, 3, false] }],
+          ['bold', 'italic', 'underline'],
+          [{ list: 'ordered' }, { list: 'bullet' }],
+          ['link', 'image']
+        ]
+      }
+    });
+
+    // 設置 Quill 的內容
+    quill.on('text-change', () => {
+      setFormData((prev) => ({
+        ...prev,
+        content: quill.root.innerHTML
+      }));
+    });
+
+    // 如果是編輯模式，載入文章內容
+    if (isEditing) {
+      setLoading(true);
+      articleService.getArticleById(id)
+        .then((response) => {
+          const article = response.data;
+          setFormData({
+            title: article.title || '',
+            slug: article.slug || '',
+            content: article.content || '',
+            excerpt: article.excerpt || '',
+            status: article.status || 'draft',
+            featured_image: article.featured_image || '',
+            category_id: article.category_id || null,
+            tag_ids: article.tags ? article.tags.map((tag: Tag) => tag.id) : []
+          });
+          quill.root.innerHTML = article.content || '';
+        })
+        .catch((err) => {
+          setError('載入文章失敗');
+        })
+        .finally(() => {
+          setLoading(false);
+        });
+    }
   }, [id, isEditing]);
 
   // 處理表單字段變更
@@ -297,16 +348,8 @@ const ArticleEdit = () => {
             
             {/* 內容 */}
             <div className="mb-3">
-              <label htmlFor="content" className="form-label">內容</label>
-              <textarea
-                className="form-control"
-                id="content"
-                name="content"
-                rows={10}
-                value={formData.content}
-                onChange={handleInputChange}
-                required
-              />
+              <label htmlFor="editor" className="form-label">內容</label>
+              <div id="editor" style={{ height: '300px', backgroundColor: '#fff' }}></div>
             </div>
             
             {/* 摘要 */}

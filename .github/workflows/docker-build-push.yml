@@ -23,21 +23,42 @@ jobs:
         username: ${{ secrets.GHCR_USERNAME }}
         password: ${{ secrets.GHCR_TOKEN }}
 
-    - name: Build and push frontend image
+    - name: Check changed files
+      id: changes
+      run: |
+        echo "🔍 檢查 frontend 和 backend 是否有變更"
+        git fetch origin main
+        FRONTEND_CHANGED=$(git diff --name-only origin/main HEAD | grep '^frontend/' || true)
+        BACKEND_CHANGED=$(git diff --name-only origin/main HEAD | grep '^backend/' || true)
+
+        if [ -n "$FRONTEND_CHANGED" ]; then
+          echo "frontend_changed=true" >> $GITHUB_OUTPUT
+        else
+          echo "frontend_changed=false" >> $GITHUB_OUTPUT
+        fi
+
+        if [ -n "$BACKEND_CHANGED" ]; then
+          echo "backend_changed=true" >> $GITHUB_OUTPUT
+        else
+          echo "backend_changed=false" >> $GITHUB_OUTPUT
+        fi
+
+    - name: Build and push frontend image if changed
+      if: steps.changes.outputs.frontend_changed == 'true'
       uses: docker/build-push-action@v5
       with:
         context: ./frontend
         push: true
         tags: ghcr.io/${{ secrets.GHCR_USERNAME }}/frontend:latest
 
-    - name: Build and push backend image
+    - name: Build and push backend image if changed
+      if: steps.changes.outputs.backend_changed == 'true'
       uses: docker/build-push-action@v5
       with:
         context: ./backend
         push: true
         tags: ghcr.io/${{ secrets.GHCR_USERNAME }}/backend:latest
 
-    # 新增：設定 KUBECONFIG 環境變數
     - name: Decode and set kubeconfig
       run: |
         echo "${{ secrets.KUBECONFIG }}" | base64 -d > kubeconfig
@@ -58,12 +79,14 @@ jobs:
         export KUBECONFIG=$PWD/kubeconfig
         kubectl apply -f backend-env.yaml --insecure-skip-tls-verify --validate=false
 
-    - name: Set backend deployment image
+    - name: Update backend deployment if backend changed
+      if: steps.changes.outputs.backend_changed == 'true'
       run: |
         export KUBECONFIG=$PWD/kubeconfig
         kubectl set image deployment/backend backend=ghcr.io/${{ secrets.GHCR_USERNAME }}/backend:latest --namespace=default
 
-    - name: Set frontend deployment image
+    - name: Update frontend deployment if frontend changed
+      if: steps.changes.outputs.frontend_changed == 'true'
       run: |
         export KUBECONFIG=$PWD/kubeconfig
         kubectl set image deployment/frontend frontend=ghcr.io/${{ secrets.GHCR_USERNAME }}/frontend:latest --namespace=default
