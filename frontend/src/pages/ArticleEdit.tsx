@@ -152,7 +152,7 @@ const ArticleEdit = () => {
           });
           quill.root.innerHTML = article.content || '';
         })
-        .catch((err) => {
+        .catch(() => {
           setError('載入文章失敗');
         })
         .finally(() => {
