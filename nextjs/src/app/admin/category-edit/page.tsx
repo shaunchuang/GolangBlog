@@ -1,3 +1,5 @@
+"use client";
+
 import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { categoryService } from '@/services/categoryService';
@@ -13,8 +15,8 @@ const CategoryEdit = () => {
 
   useEffect(() => {
     const fetchCategory = async () => {
-      const fetchedCategory = await categoryService.getCategoryById(id);
-      setCategory(fetchedCategory);
+      const response = await categoryService.getCategoryById(id);
+      setCategory(response.data);
     };
 
     if (id) {

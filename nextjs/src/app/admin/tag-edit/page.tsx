@@ -1,18 +1,21 @@
+"use client";
+
 import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { tagService } from '@/services/tagService';
+import { Tag } from '@/types/api';
 
 const TagEdit = () => {
   const params = useParams();
   const id = params?.id as string | number; // Ensure id is explicitly typed as string or number
   const router = useRouter();
-  const [tag, setTag] = useState(null);
+  const [tag, setTag] = useState<Tag | null>(null);
 
   useEffect(() => {
     const fetchTag = async () => {
       if (id) {
-        const fetchedTag = await tagService.getTagById(id); // Correctly define fetchedTag
-        setTag(fetchedTag);
+        const response = await tagService.getTagById(id);
+        setTag(response.data);
       }
     };
 

@@ -1,8 +1,9 @@
 import { TagsState } from '@/types/state';
 import { ActionType } from '@/types/state';
+import { Pagination } from '@/types/state';
 
 // 標籤狀態的初始值
-export const initialTagsState: TagsState = {
+export const initialTagsState: TagsState & { pagination: Pagination } = {
   items: [],
   loading: false,
   error: null,

@@ -1,9 +1,7 @@
 import type { Metadata } from 'next'
 import { Inter } from 'next/font/google'
 import './globals.css'
-import { AppProvider } from '@/contexts/AppContext'
-import Header from '@/components/Header'
-import Navbar from '@/components/Navbar'
+import ClientWrapper from '@/components/ClientWrapper'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -20,22 +18,9 @@ export default function RootLayout({
   return (
     <html lang="zh-TW">
       <body className={inter.className}>
-        <AppProvider>
-          <div className="d-flex flex-column min-vh-100">
-            <Header />
-            <Navbar />
-            <main className="flex-grow-1">
-              <div className="container py-4">
-                {children}
-              </div>
-            </main>
-            <footer className="bg-dark text-white py-3">
-              <div className="container text-center">
-                <p className="mb-0">© 2025 Golang Blog. All rights reserved.</p>
-              </div>
-            </footer>
-          </div>
-        </AppProvider>
+        <ClientWrapper>
+          {children}
+        </ClientWrapper>
       </body>
     </html>
   )

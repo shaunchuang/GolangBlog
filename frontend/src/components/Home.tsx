@@ -1,9 +1,6 @@
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faCalendarAlt, faUser, faTag, faEye } from '@fortawesome/free-solid-svg-icons';
 import { Link } from 'react-router-dom';
-import { useEffect } from 'react';
-
-
 
 const ArticleCard = ({ id, title, excerpt, date, author, tags, views }: {
   id: number;
@@ -15,34 +12,34 @@ const ArticleCard = ({ id, title, excerpt, date, author, tags, views }: {
   views: number;
 }) => {
   return (
-    <div className="card mb-4 shadow-sm h-100">
+    <div className="card h-full">
       <div className="card-body">
-        <h3 className="card-title">
-          <Link to={`/articles/${id}`} className="text-decoration-none text-dark">
+        <h3 className="text-xl font-bold mb-2">
+          <Link to={`/articles/${id}`} className="text-gray-900 dark:text-gray-100 no-underline hover:text-blue-600 dark:hover:text-blue-400">
             {title}
           </Link>
         </h3>
-        <p className="card-text text-truncate" style={{ maxHeight: '4.5em', overflow: 'hidden' }}>
+        <p className="text-gray-700 dark:text-gray-300 mb-4 line-clamp-2">
           {excerpt}
         </p>
-        <div className="d-flex flex-wrap justify-content-between text-muted small">
-          <div className="mb-2 mb-md-0">
-            <span className="me-3">
-              <FontAwesomeIcon icon={faCalendarAlt} className="me-1" />
+        <div className="flex flex-wrap justify-between text-gray-600 dark:text-gray-400 text-sm">
+          <div className="mb-2 md:mb-0">
+            <span className="mr-3">
+              <FontAwesomeIcon icon={faCalendarAlt} className="mr-1" />
               {date}
             </span>
-            <span className="me-3">
-              <FontAwesomeIcon icon={faUser} className="me-1" />
+            <span className="mr-3">
+              <FontAwesomeIcon icon={faUser} className="mr-1" />
               {author}
             </span>
           </div>
           <div>
-            <span className="me-3">
-              <FontAwesomeIcon icon={faEye} className="me-1" />
+            <span className="mr-3">
+              <FontAwesomeIcon icon={faEye} className="mr-1" />
               {views} 次瀏覽
             </span>
             <span>
-              <FontAwesomeIcon icon={faTag} className="me-1" />
+              <FontAwesomeIcon icon={faTag} className="mr-1" />
               {tags.join(', ')}
             </span>
           </div>
@@ -54,38 +51,38 @@ const ArticleCard = ({ id, title, excerpt, date, author, tags, views }: {
 
 const FeaturedArticleSlide = ({ article }: { article: any }) => {
   return (
-    <div className="card bg-dark text-white border-0 rounded-3 overflow-hidden h-100">
-      <div className="bg-image" style={{ 
+    <div className="relative rounded-lg overflow-hidden h-full bg-gray-900 text-white border-0">
+      <div className="absolute inset-0" style={{ 
         backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.7)), url(https://source.unsplash.com/random/800x400?${article.tags[0].toLowerCase()})`,
-        height: '300px',
         backgroundSize: 'cover',
-        backgroundPosition: 'center'
+        backgroundPosition: 'center',
+        height: '100%'
       }}>
       </div>
-      <div className="card-img-overlay d-flex flex-column justify-content-end">
-        <h2 className="card-title mb-2 fs-3 fs-md-2">
-          <Link to={`/articles/${article.id}`} className="text-white text-decoration-none">
+      <div className="relative flex flex-col justify-end p-6 h-full">
+        <h2 className="text-xl md:text-2xl font-bold mb-2">
+          <Link to={`/articles/${article.id}`} className="text-white no-underline hover:text-gray-200">
             {article.title}
           </Link>
         </h2>
-        <p className="card-text mb-3 d-none d-md-block">{article.excerpt}</p>
-        <p className="card-text mb-3 d-block d-md-none">
+        <p className="mb-3 hidden md:block">{article.excerpt}</p>
+        <p className="mb-3 block md:hidden">
           {article.excerpt.length > 60 ? article.excerpt.substring(0, 60) + '...' : article.excerpt}
         </p>
-        <div className="d-flex flex-wrap justify-content-between text-light small">
-          <div className="mb-1 mb-md-0">
-            <span className="me-3">
-              <FontAwesomeIcon icon={faCalendarAlt} className="me-1" />
+        <div className="flex flex-wrap justify-between text-gray-300 text-sm">
+          <div className="mb-1 md:mb-0">
+            <span className="mr-3">
+              <FontAwesomeIcon icon={faCalendarAlt} className="mr-1" />
               {article.date}
             </span>
-            <span className="me-3 d-none d-sm-inline-block">
-              <FontAwesomeIcon icon={faUser} className="me-1" />
+            <span className="mr-3 hidden sm:inline-block">
+              <FontAwesomeIcon icon={faUser} className="mr-1" />
               {article.author}
             </span>
           </div>
           <div>
             <span>
-              <FontAwesomeIcon icon={faTag} className="me-1" />
+              <FontAwesomeIcon icon={faTag} className="mr-1" />
               {article.tags.join(', ')}
             </span>
           </div>
@@ -147,76 +144,42 @@ const Home = () => {
       views: 542
     }
   ];
-
-  // 初始化Bootstrap的Carousel
-  useEffect(() => {
-    // 確保在組件渲染後初始化carousel
-    if (typeof window !== 'undefined' && typeof document !== 'undefined') {
-      // 動態導入Bootstrap的JavaScript
-      import('bootstrap/dist/js/bootstrap.bundle.min.js').then(() => {
-        // Bootstrap will be automatically initialized
-      }).catch(e => console.error('Failed to load Bootstrap:', e));
-    }
-  }, []);
   
   return (
     <>
-      <section className="mb-5">
-        <div className="row mb-3">
-          <div className="col">
-            <h2 className="border-bottom pb-2">精選文章</h2>
-          </div>
+      <section className="mb-10">
+        <div className="mb-6 border-b border-gray-200 pb-2">
+          <h2 className="text-2xl font-bold">精選文章</h2>
         </div>
         
-        <div className="row">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
           {/* Left-side carousel */}
-          <div className="col-12 col-lg-7">
-            <div id="featuredArticlesCarousel" className="carousel slide" data-bs-ride="carousel">
-              <div className="carousel-indicators">
-                {featuredArticles.map((_, index) => (
-                  <button
-                    key={index}
-                    type="button"
-                    data-bs-target="#featuredArticlesCarousel"
-                    data-bs-slide-to={index}
-                    className={index === 0 ? "active" : ""}
-                    aria-current={index === 0 ? "true" : "false"}
-                    aria-label={`Slide ${index + 1}`}
-                  ></button>
-                ))}
+          <div className="lg:col-span-7">
+            <div id="featuredArticlesCarousel" className="relative">
+              <div className="hidden">
+                {/* 由於移除了Bootstrap，我們不再需要輪播指標 */}
+                {/* 後續可使用React套件如react-slick或建立自定義輪播 */}
               </div>
               
-              <div className="carousel-inner rounded-3 shadow">
-                {featuredArticles.map((article, index) => (
-                  <div key={article.id} className={`carousel-item ${index === 0 ? 'active' : ''}`}>
-                    <FeaturedArticleSlide article={article} />
-                  </div>
-                ))}
+              <div className="rounded-lg shadow-md overflow-hidden">
+                {/* 只顯示第一個文章，移除輪播功能，後續可使用React輪播套件 */}
+                <FeaturedArticleSlide article={featuredArticles[0]} />
               </div>
-              
-              <button className="carousel-control-prev" type="button" data-bs-target="#featuredArticlesCarousel" data-bs-slide="prev">
-                <span className="carousel-control-prev-icon" aria-hidden="true"></span>
-                <span className="visually-hidden">Previous</span>
-              </button>
-              <button className="carousel-control-next" type="button" data-bs-target="#featuredArticlesCarousel" data-bs-slide="next">
-                <span className="carousel-control-next-icon" aria-hidden="true"></span>
-                <span className="visually-hidden">Next</span>
-              </button>
             </div>
           </div>
 
           {/* Right-side article list */}
-          <div className="col-12 col-lg-5">
-            <div className="list-group">
+          <div className="lg:col-span-5">
+            <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md divide-y divide-gray-200 dark:divide-gray-700">
               {featuredArticles.map(article => (
                 <Link
                   key={article.id}
                   to={`/articles/${article.id}`}
-                  className="list-group-item list-group-item-action"
+                  className="block p-4 hover:bg-gray-50 dark:hover:bg-gray-700 transition duration-150"
                 >
-                  <h5 className="mb-1">{article.title}</h5>
-                  <p className="mb-1 text-muted small">{article.excerpt}</p>
-                  <small className="text-muted">
+                  <h5 className="text-lg font-semibold mb-1">{article.title}</h5>
+                  <p className="text-gray-600 dark:text-gray-400 text-sm mb-1">{article.excerpt}</p>
+                  <small className="text-gray-500 dark:text-gray-500">
                     {article.date} - {article.author}
                   </small>
                 </Link>
@@ -227,14 +190,12 @@ const Home = () => {
       </section>
       
       <section>
-        <div className="row mb-3">
-          <div className="col">
-            <h2 className="border-bottom pb-2">最新文章</h2>
-          </div>
+        <div className="mb-6 border-b border-gray-200 pb-2">
+          <h2 className="text-2xl font-bold">最新文章</h2>
         </div>
-        <div className="row">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {recentArticles.map(article => (
-            <div key={article.id} className="col-12 col-md-6 col-lg-4 d-flex">
+            <div key={article.id}>
               <ArticleCard {...article} />
             </div>
           ))}

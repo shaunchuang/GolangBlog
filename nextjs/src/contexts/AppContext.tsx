@@ -16,7 +16,30 @@ const initialState: AppState = {
   ui: {
     theme: 'light',
     language: 'zh',
-    sidebarOpen: false
+    sidebarOpen: false,
+    notifications: [] // Add missing notifications array
+  },
+  articles: {
+    items: [],
+    current: null,
+    loading: false,
+    error: null,
+    pagination: {
+      total: 0,
+      page: 1,
+      pageSize: 10,
+      totalPages: 0
+    }
+  },
+  categories: {
+    items: [],
+    loading: false,
+    error: null
+  },
+  tags: {
+    items: [],
+    loading: false,
+    error: null
   }
 };
 
@@ -122,6 +145,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   // 在應用初始化時檢查用戶是否已登入
   useEffect(() => {
     const loadUser = async () => {
+      if (typeof window === 'undefined') {
+        return; // Skip on server-side
+      }
+      
       // 檢查 localStorage 中是否有 token
       const token = localStorage.getItem('auth_token');
       
@@ -134,12 +161,23 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         authService.setAuthToken(token);
         
         // 獲取用戶信息
-        const user = await authService.getCurrentUser();
+        const userResponse = await authService.getCurrentUser();
+        
+        // 將 User 類型轉換為 AuthUser 類型
+        const userData = userResponse.data;
+        const authUser: AuthUser = {
+          id: userData.id,
+          username: userData.username,
+          email: userData.email,
+          role: userData.role,
+          avatar: userData.avatar,
+          createdAt: userData.created_at
+        };
         
         // 更新狀態
         dispatch({
           type: ActionType.LOGIN_SUCCESS,
-          payload: { token, user }
+          payload: { token, user: authUser }
         });
       } catch (err) {
         console.error('加載用戶失敗:', err);
@@ -159,6 +197,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   // 監聽 auth 狀態變化
   useEffect(() => {
+    if (typeof window === 'undefined') {
+      return; // Skip on server-side
+    }
+    
     // 當用戶登入時，保存 token 到 localStorage
     if (state.auth.token) {
       localStorage.setItem('auth_token', state.auth.token);

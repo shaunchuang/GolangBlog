@@ -1,8 +1,9 @@
-import Image from "next/image";
+"use client";
+
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faCalendarAlt, faUser, faTag, faEye } from '@fortawesome/free-solid-svg-icons';
 import Link from 'next/link';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 
 const ArticleCard = ({ id, title, excerpt, date, author, tags, views }: {
   id: number;
@@ -14,34 +15,34 @@ const ArticleCard = ({ id, title, excerpt, date, author, tags, views }: {
   views: number;
 }) => {
   return (
-    <div className="card mb-4 shadow-sm h-100">
+    <div className="card h-full">
       <div className="card-body">
-        <h3 className="card-title">
-          <Link href={`/articles/${id}`} className="text-decoration-none text-dark">
+        <h3 className="text-xl font-bold mb-2">
+          <Link href={`/articles/${id}`} className="text-gray-900 dark:text-gray-100 no-underline hover:text-blue-600 dark:hover:text-blue-400">
             {title}
           </Link>
         </h3>
-        <p className="card-text text-truncate" style={{ maxHeight: '4.5em', overflow: 'hidden' }}>
+        <p className="text-gray-700 dark:text-gray-300 mb-4 line-clamp-2">
           {excerpt}
         </p>
-        <div className="d-flex flex-wrap justify-content-between text-muted small">
-          <div className="mb-2 mb-md-0">
-            <span className="me-3">
-              <FontAwesomeIcon icon={faCalendarAlt} className="me-1" />
+        <div className="flex flex-wrap justify-between text-gray-600 dark:text-gray-400 text-sm">
+          <div className="mb-2 md:mb-0">
+            <span className="mr-3">
+              <FontAwesomeIcon icon={faCalendarAlt} className="mr-1" />
               {date}
             </span>
-            <span className="me-3">
-              <FontAwesomeIcon icon={faUser} className="me-1" />
+            <span className="mr-3">
+              <FontAwesomeIcon icon={faUser} className="mr-1" />
               {author}
             </span>
           </div>
           <div>
-            <span className="me-3">
-              <FontAwesomeIcon icon={faEye} className="me-1" />
+            <span className="mr-3">
+              <FontAwesomeIcon icon={faEye} className="mr-1" />
               {views} 次瀏覽
             </span>
             <span>
-              <FontAwesomeIcon icon={faTag} className="me-1" />
+              <FontAwesomeIcon icon={faTag} className="mr-1" />
               {tags.join(', ')}
             </span>
           </div>
@@ -53,38 +54,38 @@ const ArticleCard = ({ id, title, excerpt, date, author, tags, views }: {
 
 const FeaturedArticleSlide = ({ article }: { article: any }) => {
   return (
-    <div className="card bg-dark text-white border-0 rounded-3 overflow-hidden h-100">
-      <div className="bg-image" style={{ 
+    <div className="relative rounded-lg overflow-hidden h-full bg-gray-900 text-white border-0">
+      <div className="absolute inset-0" style={{ 
         backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.7)), url(https://source.unsplash.com/random/800x400?${article.tags[0].toLowerCase()})`,
-        height: '300px',
         backgroundSize: 'cover',
-        backgroundPosition: 'center'
+        backgroundPosition: 'center',
+        height: '100%'
       }}>
       </div>
-      <div className="card-img-overlay d-flex flex-column justify-content-end">
-        <h2 className="card-title mb-2 fs-3 fs-md-2">
-          <Link href={`/articles/${article.id}`} className="text-white text-decoration-none">
+      <div className="relative flex flex-col justify-end p-6 h-full">
+        <h2 className="text-xl md:text-2xl font-bold mb-2">
+          <Link href={`/articles/${article.id}`} className="text-white no-underline hover:text-gray-200">
             {article.title}
           </Link>
         </h2>
-        <p className="card-text mb-3 d-none d-md-block">{article.excerpt}</p>
-        <p className="card-text mb-3 d-block d-md-none">
+        <p className="mb-3 hidden md:block">{article.excerpt}</p>
+        <p className="mb-3 block md:hidden">
           {article.excerpt.length > 60 ? article.excerpt.substring(0, 60) + '...' : article.excerpt}
         </p>
-        <div className="d-flex flex-wrap justify-content-between text-light small">
-          <div className="mb-1 mb-md-0">
-            <span className="me-3">
-              <FontAwesomeIcon icon={faCalendarAlt} className="me-1" />
+        <div className="flex flex-wrap justify-between text-gray-300 text-sm">
+          <div className="mb-1 md:mb-0">
+            <span className="mr-3">
+              <FontAwesomeIcon icon={faCalendarAlt} className="mr-1" />
               {article.date}
             </span>
-            <span className="me-3 d-none d-sm-inline-block">
-              <FontAwesomeIcon icon={faUser} className="me-1" />
+            <span className="mr-3 hidden sm:inline-block">
+              <FontAwesomeIcon icon={faUser} className="mr-1" />
               {article.author}
             </span>
           </div>
           <div>
             <span>
-              <FontAwesomeIcon icon={faTag} className="me-1" />
+              <FontAwesomeIcon icon={faTag} className="mr-1" />
               {article.tags.join(', ')}
             </span>
           </div>
@@ -95,103 +96,151 @@ const FeaturedArticleSlide = ({ article }: { article: any }) => {
 };
 
 export default function Home() {
-  return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm/6 text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-[family-name:var(--font-geist-mono)] font-semibold">
-              src/app/page.tsx
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
+  // 模擬文章資料
+  const featuredArticles = [
+    {
+      id: 1,
+      title: "Golang 最佳實踐指南",
+      excerpt: "此文章介紹了 Go 語言的最佳實踐和常見的程式設計模式，幫助開發者寫出高效能、可維護的程式碼。",
+      date: "2025-04-01",
+      author: "Shaun",
+      tags: ["Golang", "最佳實踐"],
+      views: 1250
+    },
+    {
+      id: 2,
+      title: "使用 React 搭配 TypeScript 的優勢",
+      excerpt: "本文深入探討了在 React 專案中使用 TypeScript 的好處，以及如何正確設置以獲得最佳開發體驗。",
+      date: "2025-03-25",
+      author: "Shaun",
+      tags: ["React", "TypeScript"],
+      views: 980
+    }
+  ];
+  
+  const recentArticles = [
+    {
+      id: 3,
+      title: "如何使用 Tailwind CSS 美化你的網站",
+      excerpt: "這篇文章詳細說明了如何利用 Tailwind CSS 框架來快速美化你的網站，提供了多種實用的技巧。",
+      date: "2025-04-03",
+      author: "Shaun",
+      tags: ["Tailwind CSS", "前端開發"],
+      views: 675
+    },
+    {
+      id: 4,
+      title: "Go 語言並發處理實戰",
+      excerpt: "探討 Go 語言中的 goroutines 和 channels，以及如何在實際項目中有效地使用它們處理並發問題。",
+      date: "2025-03-30",
+      author: "Shaun",
+      tags: ["Golang", "並發"],
+      views: 820
+    },
+    {
+      id: 5,
+      title: "前端開發中的 i18n 國際化",
+      excerpt: "本文介紹了如何在前端專案中實現國際化，使你的網站能夠支援多種語言。",
+      date: "2025-03-28",
+      author: "Shaun",
+      tags: ["i18n", "前端開發"],
+      views: 542
+    }
+  ];
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+  // 簡單的輪播狀態管理
+  const [activeSlide, setActiveSlide] = useState(0);
+
+  // 定時更換輪播內容
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setActiveSlide((prev) => (prev + 1) % featuredArticles.length);
+    }, 5000);
+    
+    return () => clearInterval(timer);
+  }, [featuredArticles.length]);
+  
+  return (
+    <>
+      <section className="mb-10">
+        <div className="mb-6 border-b border-gray-200 pb-2">
+          <h2 className="text-2xl font-bold">精選文章</h2>
         </div>
-      </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
-    </div>
+        
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+          {/* Left-side carousel - 用純React實現簡單輪播 */}
+          <div className="lg:col-span-7">
+            <div className="relative rounded-lg shadow-md overflow-hidden">
+              <FeaturedArticleSlide article={featuredArticles[activeSlide]} />
+              
+              {/* 簡易輪播控制按鈕 */}
+              <div className="absolute bottom-2 left-1/2 transform -translate-x-1/2 flex gap-2">
+                {featuredArticles.map((_, index) => (
+                  <button
+                    key={index}
+                    onClick={() => setActiveSlide(index)}
+                    className={`w-2 h-2 rounded-full ${index === activeSlide ? 'bg-white' : 'bg-gray-400'}`}
+                    aria-label={`轉到幻燈片 ${index + 1}`}
+                  ></button>
+                ))}
+              </div>
+              
+              {/* 左右切換按鈕 */}
+              <button 
+                className="absolute left-2 top-1/2 transform -translate-y-1/2 bg-black/30 hover:bg-black/50 text-white rounded-full p-2"
+                onClick={() => setActiveSlide((activeSlide - 1 + featuredArticles.length) % featuredArticles.length)}
+              >
+                <span className="sr-only">上一個</span>
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" className="w-5 h-5">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                </svg>
+              </button>
+              
+              <button 
+                className="absolute right-2 top-1/2 transform -translate-y-1/2 bg-black/30 hover:bg-black/50 text-white rounded-full p-2"
+                onClick={() => setActiveSlide((activeSlide + 1) % featuredArticles.length)}
+              >
+                <span className="sr-only">下一個</span>
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" className="w-5 h-5">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                </svg>
+              </button>
+            </div>
+          </div>
+
+          {/* Right-side article list */}
+          <div className="lg:col-span-5">
+            <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md divide-y divide-gray-200 dark:divide-gray-700">
+              {featuredArticles.map(article => (
+                <Link
+                  key={article.id}
+                  href={`/articles/${article.id}`}
+                  className="block p-4 hover:bg-gray-50 dark:hover:bg-gray-700 transition duration-150"
+                >
+                  <h5 className="text-lg font-semibold mb-1">{article.title}</h5>
+                  <p className="text-gray-600 dark:text-gray-400 text-sm mb-1">{article.excerpt}</p>
+                  <small className="text-gray-500 dark:text-gray-500">
+                    {article.date} - {article.author}
+                  </small>
+                </Link>
+              ))}
+            </div>
+          </div>
+        </div>
+      </section>
+      
+      <section>
+        <div className="mb-6 border-b border-gray-200 pb-2">
+          <h2 className="text-2xl font-bold">最新文章</h2>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {recentArticles.map(article => (
+            <div key={article.id}>
+              <ArticleCard {...article} />
+            </div>
+          ))}
+        </div>
+      </section>
+    </>
   );
 }

@@ -11,7 +11,7 @@ export const authService = {
     });
     
     // 將 token 保存到本地存儲
-    if (response.data.token) {
+    if (response.data.token && typeof window !== 'undefined') {
       localStorage.setItem('auth_token', response.data.token);
     }
     
@@ -27,7 +27,7 @@ export const authService = {
     });
     
     // 將 token 保存到本地存儲
-    if (response.data.token) {
+    if (response.data.token && typeof window !== 'undefined') {
       localStorage.setItem('auth_token', response.data.token);
     }
     
@@ -36,8 +36,24 @@ export const authService = {
   
   // 用戶登出
   logout: () => {
-    localStorage.removeItem('auth_token');
-    localStorage.removeItem('auth_remember');
+    if (typeof window !== 'undefined') {
+      localStorage.removeItem('auth_token');
+      localStorage.removeItem('auth_remember');
+    }
+  },
+  
+  // 設置認證 token
+  setAuthToken: (token: string) => {
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('auth_token', token);
+    }
+  },
+  
+  // 移除認證 token
+  removeAuthToken: () => {
+    if (typeof window !== 'undefined') {
+      localStorage.removeItem('auth_token');
+    }
   },
   
   // 獲取當前用戶信息
