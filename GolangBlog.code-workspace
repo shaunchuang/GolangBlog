@@ -1,0 +1,14 @@
+{
+	"folders": [
+		{
+			"path": "backend"
+		},
+		{
+			"path": "nextjs"
+		},
+		{
+			"path": "."
+		}
+	],
+	"settings": {}
+}
