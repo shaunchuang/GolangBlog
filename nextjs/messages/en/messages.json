@@ -1,0 +1,51 @@
+{
+  "navigation": {
+    "home": "Home",
+    "news": "News",
+    "politics": "Politics",
+    "business": "Business",
+    "technology": "Technology",
+    "entertainment": "Entertainment",
+    "sports": "Sports",
+    "health": "Health"
+  },
+  "user": {
+    "login": "Login",
+    "register": "Register",
+    "profile": "Profile",
+    "settings": "Settings",
+    "logout": "Logout"
+  },
+  "featured": {
+    "title": "Breaking News",
+    "readMore": "Read more"
+  },
+  "Common": {
+    "readMore": "Read more",
+    "loading": "Loading...",
+    "search": "Search",
+    "searchPlaceholder": "Search news, articles, topics...",
+    "searchButton": "Search",
+    "searching": "Searching",
+    "previous": "Previous",
+    "next": "Next",
+    "subscribe": "Subscribe",
+    "emailPlaceholder": "Your email address",
+    "subscribeToNewsletter": "Subscribe to our newsletter",
+    "privacyNotice": "We respect your privacy and will not share your information."
+  },
+  "latestNews": "Latest News",
+  "trending": "Trending",
+  "popularTags": "Popular Tags",
+  "Metadata": {
+    "search": {
+      "title": "Search News | SJ Sphere",
+      "description": "Search for the latest news, articles, and analysis from SJ Sphere News",
+      "keywords": {
+        "search": "search",
+        "newsSearch": "news search",
+        "queryNews": "query news"
+      }
+    }
+  }
+}

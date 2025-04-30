@@ -28,6 +28,9 @@ func SetupRoutes(router *gin.Engine) {
 			articles.GET("", controllers.GetArticles)
 			articles.GET("/:id", controllers.GetArticle)
 			articles.GET("/slug/:slug", controllers.GetArticleBySlug)
+			articles.GET("/featured", controllers.GetFeaturedArticles)             // 新增獲取精選文章的路由
+			articles.GET("/latest", controllers.GetLatestArticles)                 // 新增獲取最新文章的路由
+			articles.GET("/category/:category", controllers.GetArticlesByCategory) // 新增根據分類獲取文章的路由
 		}
 
 		// 公開標籤API

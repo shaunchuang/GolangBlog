@@ -36,6 +36,7 @@ type Article struct {
 	PublishedAt   *time.Time           `json:"published_at"`
 	FeaturedImage string               `gorm:"size:255" json:"featured_image"`
 	ViewCount     int                  `gorm:"default:0" json:"view_count"`
+	IsFeatured    bool                 `gorm:"default:false" json:"is_featured"` // 新增精選文章標記
 	Translations  []ArticleTranslation `gorm:"foreignKey:ArticleID" json:"translations"`
 	Tags          []Tag                `gorm:"many2many:article_tags;" json:"tags"`
 }

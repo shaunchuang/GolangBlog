@@ -470,3 +470,141 @@ func GenerateSlug(c *gin.Context) {
 		"slug": generatedSlug,
 	})
 }
+
+// 獲取精選文章
+func GetFeaturedArticles(c *gin.Context) {
+	var articles []models.Article
+	limit := 5 // 默認返回5篇精選文章
+
+	// 從查詢參數獲取需要的數量
+	limitParam := c.Query("limit")
+	if limitParam != "" {
+		parsedLimit, err := strconv.Atoi(limitParam)
+		if err == nil && parsedLimit > 0 {
+			limit = parsedLimit
+		}
+	}
+
+	// 獲取語言參數
+	langCode := c.DefaultQuery("lang", "zh-TW")
+
+	// 查詢條件：status = 'published' 且 is_featured = true
+	query := config.DB.Model(&models.Article{}).
+		Where("status = ? AND is_featured = ?", "published", true)
+
+	// 關聯翻譯表並按指定語言篩選
+	query = query.Preload("Translations", func(db *gorm.DB) *gorm.DB {
+		return db.Where("language_code = ?", langCode)
+	}).Preload("Tags.Translations", func(db *gorm.DB) *gorm.DB {
+		return db.Where("language_code = ?", langCode)
+	}).Preload("User")
+
+	// 按發布時間降序排列
+	query = query.Order("published_at DESC")
+
+	// 限制返回數量
+	query = query.Limit(limit)
+
+	// 執行查詢
+	if err := query.Find(&articles).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"articles": articles,
+	})
+}
+
+// 獲取最新文章
+func GetLatestArticles(c *gin.Context) {
+	var articles []models.Article
+	limit := 3 // 默認返回3篇最新文章
+
+	// 從查詢參數獲取需要的數量
+	limitParam := c.Query("limit")
+	if limitParam != "" {
+		parsedLimit, err := strconv.Atoi(limitParam)
+		if err == nil && parsedLimit > 0 {
+			limit = parsedLimit
+		}
+	}
+
+	// 獲取語言參數
+	langCode := c.DefaultQuery("lang", "zh-TW")
+
+	// 查詢條件：status = 'published'
+	query := config.DB.Model(&models.Article{}).
+		Where("status = ?", "published")
+
+	// 關聯翻譯表並按指定語言篩選
+	query = query.Preload("Translations", func(db *gorm.DB) *gorm.DB {
+		return db.Where("language_code = ?", langCode)
+	}).Preload("Tags.Translations", func(db *gorm.DB) *gorm.DB {
+		return db.Where("language_code = ?", langCode)
+	}).Preload("User")
+
+	// 按發布時間降序排列
+	query = query.Order("published_at DESC")
+
+	// 限制返回數量
+	query = query.Limit(limit)
+
+	// 執行查詢
+	if err := query.Find(&articles).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"articles": articles,
+	})
+}
+
+// 根據分類獲取文章
+func GetArticlesByCategory(c *gin.Context) {
+	var articles []models.Article
+	category := c.Param("category")
+	limit := 2 // 默認返回2篇分類文章
+
+	// 從查詢參數獲取需要的數量
+	limitParam := c.Query("limit")
+	if limitParam != "" {
+		parsedLimit, err := strconv.Atoi(limitParam)
+		if err == nil && parsedLimit > 0 {
+			limit = parsedLimit
+		}
+	}
+
+	// 獲取語言參數
+	langCode := c.DefaultQuery("lang", "zh-TW")
+
+	// 查詢條件：使用 category_translations 表並篩選 slug 和語言
+	query := config.DB.Model(&models.Article{}).
+		Joins("JOIN article_categories ON articles.id = article_categories.article_id").
+		Joins("JOIN category_translations ON article_categories.category_id = category_translations.category_id AND category_translations.language_code = ?", langCode).
+		Where("category_translations.slug = ? AND articles.status = ?", category, "published")
+
+	// 關聯翻譯表並按指定語言篩選
+	query = query.Preload("Translations", func(db *gorm.DB) *gorm.DB {
+		return db.Where("language_code = ?", langCode)
+	}).Preload("Tags.Translations", func(db *gorm.DB) *gorm.DB {
+		return db.Where("language_code = ?", langCode)
+	}).Preload("User")
+
+	// 按發布時間降序排列
+	query = query.Order("articles.published_at DESC")
+
+	// 限制返回數量
+	query = query.Limit(limit)
+
+	// 執行查詢
+	if err := query.Find(&articles).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"articles": articles,
+	})
+}

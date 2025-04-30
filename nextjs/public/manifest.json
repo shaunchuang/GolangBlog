@@ -1,0 +1,22 @@
+{
+  "name": "SJ Sphere News",
+  "short_name": "SJNews",
+  "description": "全球領先多語言新聞平台，提供最新國際新聞、財經、科技、體育等各類新聞資訊",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#1d4ed8",
+  "icons": [
+    {
+      "src": "/icons/icon-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/icons/icon-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ],
+  "prefer_related_applications": false
+}
