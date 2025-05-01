@@ -3,6 +3,8 @@
 import { useState, useEffect, useRef } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faArrowRight, faChevronLeft, faChevronRight } from '@fortawesome/free-solid-svg-icons';
 
 // 環境判斷常數
 const IS_PRODUCTION = process.env.NODE_ENV === 'production';
@@ -195,9 +197,10 @@ export default function NewsCarousel({ customNews }: NewsCarouselProps) {
                 </p>
                 <Link
                   href={news.url}
-                  className="inline-block px-4 py-2 text-sm font-semibold bg-white text-black rounded hover:bg-gray-200 transition-colors"
+                  className="inline-flex items-center px-4 py-2 text-sm font-semibold bg-white text-black rounded hover:bg-gray-200 transition-colors"
                 >
-                  Read More
+                  閱讀更多
+                  <FontAwesomeIcon icon={faArrowRight} className="ml-2 h-3 w-3" />
                 </Link>
               </div>
             </div>
@@ -208,21 +211,17 @@ export default function NewsCarousel({ customNews }: NewsCarouselProps) {
       {/* 左右導航按鈕 */}
       <button
         onClick={prevSlide}
-        className="absolute left-0 z-20 top-1/2 transform -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white p-2 m-2 rounded-full focus:outline-none"
+        className="absolute left-0 z-20 top-1/2 transform -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white p-2 m-2 rounded-full focus:outline-none transition-colors"
         aria-label="Previous slide"
       >
-        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-        </svg>
+        <FontAwesomeIcon icon={faChevronLeft} className="h-6 w-6" />
       </button>
       <button
         onClick={nextSlide}
-        className="absolute right-0 z-20 top-1/2 transform -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white p-2 m-2 rounded-full focus:outline-none"
+        className="absolute right-0 z-20 top-1/2 transform -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white p-2 m-2 rounded-full focus:outline-none transition-colors"
         aria-label="Next slide"
       >
-        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-        </svg>
+        <FontAwesomeIcon icon={faChevronRight} className="h-6 w-6" />
       </button>
 
       {/* 輪播指示器 */}
@@ -231,8 +230,8 @@ export default function NewsCarousel({ customNews }: NewsCarouselProps) {
           <button
             key={index}
             onClick={() => goToSlide(index)}
-            className={`w-3 h-3 rounded-full focus:outline-none ${
-              currentSlide === index ? 'bg-white' : 'bg-white/50'
+            className={`w-3 h-3 rounded-full focus:outline-none transition-colors ${
+              currentSlide === index ? 'bg-white' : 'bg-white/50 hover:bg-white/80'
             }`}
             aria-label={`Go to slide ${index + 1}`}
           />

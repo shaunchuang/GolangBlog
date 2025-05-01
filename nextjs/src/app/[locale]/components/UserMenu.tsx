@@ -3,10 +3,11 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { useTranslations } from 'next-intl';
 
 export default function UserMenu() {
-  // 暫時移除 useTranslations hook
-  // const t = useTranslations('user');
+  const t = useTranslations('User');
   const [isOpen, setIsOpen] = useState(false);
   // 模擬用戶狀態，實際應用中應從認證服務取得
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -40,7 +41,7 @@ export default function UserMenu() {
               <Image
                 className="h-8 w-8 rounded-full"
                 src="https://news.sj-sphere.com/placeholder-avatar.jpg"
-                alt="User avatar"
+                alt={t('userAvatar')}
                 width={32}
                 height={32}
                 onError={(e) => {
@@ -49,18 +50,10 @@ export default function UserMenu() {
                 }}
               />
             ) : (
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
+              <FontAwesomeIcon
+                icon="user"
                 className="h-5 w-5 text-gray-500"
-                viewBox="0 0 20 20"
-                fill="currentColor"
-              >
-                <path
-                  fillRule="evenodd"
-                  d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z"
-                  clipRule="evenodd"
-                />
-              </svg>
+              />
             )}
           </div>
         </button>
@@ -77,44 +70,49 @@ export default function UserMenu() {
             <>
               <Link
                 href="/profile"
-                className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                className="px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center"
                 role="menuitem"
                 onClick={() => setIsOpen(false)}
               >
-                Profile
+                <FontAwesomeIcon icon="user-circle" className="mr-2 h-4 w-4" />
+                {t('profile')}
               </Link>
               <Link
                 href="/settings"
-                className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                className="px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center"
                 role="menuitem"
                 onClick={() => setIsOpen(false)}
               >
-                Settings
+                <FontAwesomeIcon icon="gear" className="mr-2 h-4 w-4" />
+                {t('settings')}
               </Link>
               <button
-                className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center"
                 role="menuitem"
                 onClick={handleLogout}
               >
-                Logout
+                <FontAwesomeIcon icon="sign-out-alt" className="mr-2 h-4 w-4" />
+                {t('logout')}
               </button>
             </>
           ) : (
             <>
               <button
-                className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center"
                 role="menuitem"
                 onClick={handleLogin}
               >
-                Login
+                <FontAwesomeIcon icon="sign-in-alt" className="mr-2 h-4 w-4" />
+                {t('login')}
               </button>
               <Link
                 href="/register"
-                className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                className="px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center"
                 role="menuitem"
                 onClick={() => setIsOpen(false)}
               >
-                Register
+                <FontAwesomeIcon icon="user-plus" className="mr-2 h-4 w-4" />
+                {t('register')}
               </Link>
             </>
           )}

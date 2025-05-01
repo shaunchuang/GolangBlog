@@ -5,6 +5,8 @@ import Link from 'next/link';
 import { usePathname, useParams, useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import Image from 'next/image';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faHome, faNewspaper, faLandmark, faChartLine, faLaptopCode, faSearch, faGlobe } from '@fortawesome/free-solid-svg-icons';
 
 export default function Navbar() {
   const [isScrolled, setIsScrolled] = useState(false);
@@ -83,41 +85,46 @@ export default function Navbar() {
               href={`/${locale}`}
               className={`px-3 py-2 rounded-md text-sm font-medium ${
                 isActive('') ? 'bg-blue-50 text-blue-700' : 'text-gray-800 hover:bg-gray-100'
-              } transition-colors`}
+              } transition-colors flex items-center space-x-1`}
             >
-              {t('home')}
+              <FontAwesomeIcon icon={faHome} className="h-4 w-4" />
+              <span className="ml-1">{t('home')}</span>
             </Link>
             <Link
               href={`/${locale}/news`}
               className={`px-3 py-2 rounded-md text-sm font-medium ${
                 isActive('/news') ? 'bg-blue-50 text-blue-700' : 'text-gray-800 hover:bg-gray-100'
-              } transition-colors`}
+              } transition-colors flex items-center space-x-1`}
             >
-              {t('news')}
+              <FontAwesomeIcon icon={faNewspaper} className="h-4 w-4" />
+              <span className="ml-1">{t('news')}</span>
             </Link>
             <Link
               href={`/${locale}/category/politics`}
               className={`px-3 py-2 rounded-md text-sm font-medium ${
                 isActive('/category/politics') ? 'bg-blue-50 text-blue-700' : 'text-gray-800 hover:bg-gray-100'
-              } transition-colors`}
+              } transition-colors flex items-center space-x-1`}
             >
-              {t('politics')}
+              <FontAwesomeIcon icon={faLandmark} className="h-4 w-4" />
+              <span className="ml-1">{t('politics')}</span>
             </Link>
             <Link
               href={`/${locale}/category/business`}
               className={`px-3 py-2 rounded-md text-sm font-medium ${
                 isActive('/category/business') ? 'bg-blue-50 text-blue-700' : 'text-gray-800 hover:bg-gray-100'
-              } transition-colors`}
+              } transition-colors flex items-center space-x-1`}
             >
-              {t('business')}
+              <FontAwesomeIcon icon={faChartLine} className="h-4 w-4" />
+              <span className="ml-1">{t('business')}</span>
             </Link>
             <Link
               href={`/${locale}/category/technology`}
               className={`px-3 py-2 rounded-md text-sm font-medium ${
                 isActive('/category/technology') ? 'bg-blue-50 text-blue-700' : 'text-gray-800 hover:bg-gray-100'
-              } transition-colors`}
+              } transition-colors flex items-center space-x-1`}
             >
-              {t('technology')}
+              <FontAwesomeIcon icon={faLaptopCode} className="h-4 w-4" />
+              <span className="ml-1">{t('technology')}</span>
             </Link>
           </nav>
           
@@ -139,9 +146,7 @@ export default function Navbar() {
                     type="submit"
                     className="bg-blue-600 text-white p-2 rounded-r-md hover:bg-blue-700 transition-colors"
                   >
-                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                    </svg>
+                    <FontAwesomeIcon icon={faSearch} className="h-5 w-5" />
                   </button>
                 </form>
               ) : (
@@ -154,9 +159,7 @@ export default function Navbar() {
                   aria-label="Search"
                   title="Search"
                 >
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                  </svg>
+                  <FontAwesomeIcon icon={faSearch} className="h-5 w-5" />
                 </button>
               )}
             </div>
@@ -185,9 +188,7 @@ export default function Navbar() {
                 aria-label="Change language"
                 title="Change language"
               >
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5h12M9 3v2m1.048 9.5A18.022 18.022 0 016.412 9m6.088 9h7M11 21l5-10 5 10M12.751 5C11.783 10.77 8.07 15.61 3 18.129" />
-                </svg>
+                <FontAwesomeIcon icon={faGlobe} className="h-5 w-5" />
               </button>
               
               {/* 語言下拉選單 - 未實現狀態 */}
@@ -201,32 +202,25 @@ export default function Navbar() {
                 aria-expanded={isMobileMenuOpen}
                 aria-label="Toggle mobile menu"
               >
-                <svg
-                  className={`${isMobileMenuOpen ? 'hidden' : 'block'} h-6 w-6`}
-                  stroke="currentColor"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M4 6h16M4 12h16M4 18h16"
-                  />
-                </svg>
-                <svg
-                  className={`${isMobileMenuOpen ? 'block' : 'hidden'} h-6 w-6`}
-                  stroke="currentColor"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M6 18L18 6M6 6l12 12"
-                  />
-                </svg>
+                {!isMobileMenuOpen ? (
+                  <svg className="h-6 w-6" stroke="currentColor" fill="none" viewBox="0 0 24 24">
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M4 6h16M4 12h16M4 18h16"
+                    />
+                  </svg>
+                ) : (
+                  <svg className="h-6 w-6" stroke="currentColor" fill="none" viewBox="0 0 24 24">
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M6 18L18 6M6 6l12 12"
+                    />
+                  </svg>
+                )}
               </button>
             </div>
           </div>
@@ -240,40 +234,45 @@ export default function Navbar() {
             href={`/${locale}`}
             className={`block px-3 py-2 rounded-md text-base font-medium ${
               isActive('') ? 'bg-blue-50 text-blue-700' : 'text-gray-800 hover:bg-gray-100'
-            } transition-colors`}
+            } transition-colors flex items-center`}
           >
+            <FontAwesomeIcon icon={faHome} className="h-5 w-5 mr-2" />
             {t('home')}
           </Link>
           <Link
             href={`/${locale}/news`}
             className={`block px-3 py-2 rounded-md text-base font-medium ${
               isActive('/news') ? 'bg-blue-50 text-blue-700' : 'text-gray-800 hover:bg-gray-100'
-            } transition-colors`}
+            } transition-colors flex items-center`}
           >
+            <FontAwesomeIcon icon={faNewspaper} className="h-5 w-5 mr-2" />
             {t('news')}
           </Link>
           <Link
             href={`/${locale}/category/politics`}
             className={`block px-3 py-2 rounded-md text-base font-medium ${
               isActive('/category/politics') ? 'bg-blue-50 text-blue-700' : 'text-gray-800 hover:bg-gray-100'
-            } transition-colors`}
+            } transition-colors flex items-center`}
           >
+            <FontAwesomeIcon icon={faLandmark} className="h-5 w-5 mr-2" />
             {t('politics')}
           </Link>
           <Link
             href={`/${locale}/category/business`}
             className={`block px-3 py-2 rounded-md text-base font-medium ${
               isActive('/category/business') ? 'bg-blue-50 text-blue-700' : 'text-gray-800 hover:bg-gray-100'
-            } transition-colors`}
+            } transition-colors flex items-center`}
           >
+            <FontAwesomeIcon icon={faChartLine} className="h-5 w-5 mr-2" />
             {t('business')}
           </Link>
           <Link
             href={`/${locale}/category/technology`}
             className={`block px-3 py-2 rounded-md text-base font-medium ${
               isActive('/category/technology') ? 'bg-blue-50 text-blue-700' : 'text-gray-800 hover:bg-gray-100'
-            } transition-colors`}
+            } transition-colors flex items-center`}
           >
+            <FontAwesomeIcon icon={faLaptopCode} className="h-5 w-5 mr-2" />
             {t('technology')}
           </Link>
           
@@ -291,9 +290,7 @@ export default function Navbar() {
                 type="submit"
                 className="bg-blue-600 text-white p-2 rounded-r-md hover:bg-blue-700 transition-colors"
               >
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                </svg>
+                <FontAwesomeIcon icon={faSearch} className="h-5 w-5" />
               </button>
             </div>
           </form>

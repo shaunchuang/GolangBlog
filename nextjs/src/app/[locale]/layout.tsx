@@ -1,4 +1,5 @@
 import '../globals.css';
+import '../../../src/lib/fontawesome'; // 導入 Font Awesome 配置
 import { NextIntlClientProvider } from 'next-intl';
 import { locales } from '../../../src/locales';
 import { Metadata, Viewport } from 'next';

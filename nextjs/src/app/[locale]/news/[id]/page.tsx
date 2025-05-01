@@ -1,5 +1,4 @@
 import { Metadata } from 'next';
-import { getRequestConfig } from 'next-intl/server';
 import axios from 'axios';
 
 // 環境判斷常數
@@ -7,6 +6,23 @@ const IS_PRODUCTION = process.env.NODE_ENV === 'production';
 const API_BASE_URL = IS_PRODUCTION
   ? 'https://news.sj-sphere.com/api'
   : 'http://localhost:8080/api';
+const IMAGE_BASE_URL = IS_PRODUCTION 
+  ? 'https://news.sj-sphere.com/images/news' 
+  : '/images/news';
+
+// 定義相關文章類型
+interface RelatedArticle {
+  id: number;
+  title: string;
+  excerpt: string;
+  image: string;
+  category: string;
+  author: string;
+  date: string;
+  tags: string[];
+  url: string;
+  content: string;
+}
 
 // 定義 Article 類型
 interface Article {
@@ -20,6 +36,7 @@ interface Article {
   date: string;
   tags: string[];
   url: string;
+  relatedArticles?: RelatedArticle[]; // 添加相關文章屬性，設為可選
 }
 
 // 定義要獲取的博客文章的類型安全參數
@@ -97,7 +114,7 @@ export default async function ArticlePage({ params }: ArticlePageParams) {
   );
 }
 
-// 請確保 messages 正確對應到當前 locale
+// 處理訊息配置
 export async function getRequestConfig({ params }: { params: { locale: string } }) {
   const locale = params.locale;
   return {
@@ -110,20 +127,11 @@ export async function getRequestConfig({ params }: { params: { locale: string } 
 
 import { useState, useEffect } from 'react';
 import { useTranslations } from 'next-intl';
-import axios from 'axios';
 import Image from 'next/image';
 import Link from 'next/link';
 import { format, parseISO } from 'date-fns';
 import { zhTW, enUS, th, vi, id, ko, ja } from 'date-fns/locale';
-
-// 環境判斷常數
-const IS_PRODUCTION = process.env.NODE_ENV === 'production';
-const API_BASE_URL = IS_PRODUCTION
-  ? 'https://news.sj-sphere.com/api'
-  : 'http://localhost:8080/api';
-const IMAGE_BASE_URL = IS_PRODUCTION 
-  ? 'https://news.sj-sphere.com/images/news' 
-  : '/images/news';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
 // 支援的語言區域設定
 const locales = {
@@ -161,20 +169,6 @@ const getImageUrl = (imagePath: string) => {
 };
 
 // 定義 Article 類型
-interface Article {
-  id: number;
-  title: string;
-  content: string;
-  excerpt: string;
-  image: string;
-  category: string;
-  author: string;
-  date: string;
-  tags: string[];
-  url: string;
-  relatedArticles?: Article[];
-}
-
 interface ClientArticleProps {
   id: string;
   locale: string;
@@ -297,9 +291,7 @@ function ClientArticle({ id, locale }: ClientArticleProps) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center max-w-lg p-8 bg-white rounded-lg shadow-md">
-          <svg className="mx-auto h-16 w-16 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-          </svg>
+          <FontAwesomeIcon icon="circle-exclamation" className="mx-auto h-16 w-16 text-red-500" />
           <h2 className="mt-4 text-xl font-bold text-gray-800">{error || '文章載入錯誤'}</h2>
           <p className="mt-2 text-gray-600">請稍後重試或回到首頁瀏覽其他內容。</p>
           <Link href={`/${locale}`} className="mt-6 inline-block px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors">
@@ -322,15 +314,11 @@ function ClientArticle({ id, locale }: ClientArticleProps) {
         </h1>
         <div className="flex flex-wrap items-center text-gray-600 mb-6">
           <span className="mr-4 flex items-center">
-            <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-            </svg>
+            <FontAwesomeIcon icon="user" className="mr-2 h-5 w-5 text-gray-500" />
             {article.author || 'SJ Sphere News'}
           </span>
           <span className="mr-4 flex items-center">
-            <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-            </svg>
+            <FontAwesomeIcon icon="calendar-days" className="mr-2 h-5 w-5 text-gray-500" />
             {formatDate(article.date)}
           </span>
         </div>
@@ -382,34 +370,31 @@ function ClientArticle({ id, locale }: ClientArticleProps) {
           
           {/* 分享按鈕 */}
           <div className="mt-8 flex items-center">
-            <span className="mr-4 font-semibold">分享：</span>
+            <span className="mr-4 font-semibold flex items-center">
+              <FontAwesomeIcon icon="share-nodes" className="mr-2 h-5 w-5 text-gray-700" />
+              分享：
+            </span>
             <div className="flex space-x-2">
               <button 
                 onClick={() => window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(window.location.href)}`, '_blank')}
                 className="p-2 bg-blue-600 text-white rounded-full hover:bg-blue-700 transition-colors"
                 aria-label="分享到 Facebook"
               >
-                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M22 12c0-5.523-4.477-10-10-10S2 6.477 2 12c0 4.991 3.657 9.128 8.438 9.878v-6.987h-2.54V12h2.54V9.797c0-2.506 1.492-3.89 3.777-3.89 1.094 0 2.238.195 2.238.195v2.46h-1.26c-1.243 0-1.63.771-1.63 1.562V12h2.773l-.443 2.89h-2.33v6.988C18.343 21.128 22 16.991 22 12z"></path>
-                </svg>
+                <FontAwesomeIcon icon={["fab", "facebook-f"]} className="h-5 w-5" />
               </button>
               <button 
                 onClick={() => window.open(`https://twitter.com/intent/tweet?url=${encodeURIComponent(window.location.href)}&text=${encodeURIComponent(article.title)}`, '_blank')}
                 className="p-2 bg-sky-500 text-white rounded-full hover:bg-sky-600 transition-colors"
                 aria-label="分享到 Twitter"
               >
-                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M8.29 20.251c7.547 0 11.675-6.253 11.675-11.675 0-.178 0-.355-.012-.53A8.348 8.348 0 0022 5.92a8.19 8.19 0 01-2.357.646 4.118 4.118 0 001.804-2.27 8.224 8.224 0 01-2.605.996 4.107 4.107 0 00-6.993 3.743 11.65 11.65 0 01-8.457-4.287 4.106 4.106 0 001.27 5.477A4.072 4.072 0 012.8 9.713v.052a4.105 4.105 0 003.292 4.022 4.095 4.095 0 01-1.853.07 4.108 4.108 0 003.834 2.85A8.233 8.233 0 012 18.407a11.616 11.616 0 006.29 1.84"></path>
-                </svg>
+                <FontAwesomeIcon icon={["fab", "x-twitter"]} className="h-5 w-5" />
               </button>
               <button 
                 onClick={() => window.open(`https://www.linkedin.com/shareArticle?mini=true&url=${encodeURIComponent(window.location.href)}&title=${encodeURIComponent(article.title)}`, '_blank')}
                 className="p-2 bg-blue-700 text-white rounded-full hover:bg-blue-800 transition-colors"
                 aria-label="分享到 LinkedIn"
               >
-                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"></path>
-                </svg>
+                <FontAwesomeIcon icon={["fab", "linkedin-in"]} className="h-5 w-5" />
               </button>
               <button 
                 onClick={() => {
@@ -419,9 +404,7 @@ function ClientArticle({ id, locale }: ClientArticleProps) {
                 className="p-2 bg-gray-600 text-white rounded-full hover:bg-gray-700 transition-colors"
                 aria-label="複製連結"
               >
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3" />
-                </svg>
+                <FontAwesomeIcon icon="copy" className="h-5 w-5" />
               </button>
             </div>
           </div>

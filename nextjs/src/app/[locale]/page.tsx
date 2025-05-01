@@ -7,6 +7,10 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { apiService } from '../../lib/apiService';
 import { API_PATHS, IMAGE_BASE_URL } from '../../lib/apiConfig';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faNewspaper, faClock, faArrowRight, faTags, faEnvelope, faArrowUp, faLandmark, faChartLine, faLaptopCode } from '@fortawesome/free-solid-svg-icons';
+import { useParams } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 
 const getImageUrl = (imagePath: string) => {
   if (imagePath && imagePath.startsWith('http') && !imagePath.includes('news.sj-sphere.com')) {
@@ -30,12 +34,33 @@ const popularTags = [
 interface Article { id: number; title: string; excerpt: string; image: string; category: string; date: string; url: string; }
 
 export default function HomePage() {
+  const params = useParams();
+  const locale = String(params.locale || 'en');
+  
   const currentYear = new Date().getFullYear();
   const [isVisible, setIsVisible] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [featuredNews, setFeaturedNews] = useState<Article[]>([]);
   const [latestNews, setLatestNews] = useState<Article[]>([]);
   const [categoryNews, setCategoryNews] = useState<Record<string, Article[]>>({ politics: [], business: [], technology: [] });
+  
+  // 確保使用有效的 locale 參數
+  let t;
+  try {
+    t = useTranslations('Common');
+  } catch (error) {
+    console.error('Translation error:', error);
+    // 使用一個基本的翻譯備用方案
+    t = (key: string) => {
+      const fallbacks: Record<string, string> = {
+        'loading': 'Loading...',
+        'emailPlaceholder': 'Your email address',
+        'subscribe': 'Subscribe',
+        'privacyNotice': 'We respect your privacy. You can unsubscribe at any time.'
+      };
+      return fallbacks[key] || key;
+    };
+  }
 
   useEffect(() => setIsVisible(true), []);
 
@@ -100,283 +125,123 @@ export default function HomePage() {
   if (isLoading) return (
     <div className="min-h-screen bg-gray-50 flex items-center justify-center">
       <div className="text-center"><div className="inline-block w-16 h-16 border-4 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
-      <p className="mt-4 text-gray-600">正在載入最新新聞...</p></div>
+      <p className="mt-4 text-gray-600">{t('loading')}</p></div>
     </div>
   );
 
   return (
-    <div className="min-h-screen bg-gray-50 relative overflow-x-hidden">
+    <>
       <Navbar />
-      <div className="h-16"></div>
-      <main className={`max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 transition-opacity duration-700 ease-in-out ${isVisible ? 'opacity-100' : 'opacity-0'}`}>
-        <section className="mb-10">
+      <main className="max-w-7xl mx-auto px-4 py-8 space-y-16">
+        {/* Featured News 輪播展示 */}
+        <section>
           <h2 className="section-title flex items-center">
-            <span className="mr-2">
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
-              </svg>
-            </span>
-            Featured News
+            <FontAwesomeIcon icon={faNewspaper} className="mr-2 text-blue-600 h-6 w-6" />
+            <span>頭條新聞</span>
           </h2>
-          <div className="rounded-xl overflow-hidden shadow-lg">
-            <NewsCarousel customNews={featuredNews} />
-          </div>
+          <NewsCarousel customNews={featuredNews} />
         </section>
-        <section className="mb-12">
+
+        {/* Latest News */}
+        <section>
           <h2 className="section-title flex items-center">
-            <span className="mr-2">
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-              </svg>
-            </span>
-            Latest News
+            <FontAwesomeIcon icon={faClock} className="mr-2 text-blue-600 h-6 w-6" />
+            <span>最新新聞</span>
           </h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {latestNews.map((news, index) => (
-              <div key={news.id} className="transform transition-all duration-500" style={{ 
-                transitionDelay: `${index * 100}ms`,
-                animation: `fadeInUp 0.6s ease-out ${index * 150}ms both`
-              }}>
-                <NewsCard
-                  id={news.id}
-                  title={news.title}
-                  excerpt={news.excerpt}
-                  image={getImageUrl(news.image)}
-                  category={news.category}
-                  date={news.date}
-                  url={news.url}
-                />
-              </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {latestNews.map(article => (
+              <NewsCard key={article.id} {...article} />
             ))}
           </div>
         </section>
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-12">
-          <section className="lg:col-span-1">
+
+        {/* 各類別新聞 */}
+        {(Object.entries(categoryNews)).map(([categoryKey, articles]) => (
+          <section key={categoryKey}>
             <h2 className="section-title flex items-center">
-              <span className="mr-2">
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
-                </svg>
-              </span>
-              Politics
+              <FontAwesomeIcon
+                icon={
+                  categoryKey === 'politics' ? faLandmark : 
+                  categoryKey === 'business' ? faChartLine : 
+                  faLaptopCode
+                }
+                className="mr-2 text-blue-600 h-6 w-6"
+              />
+              <span className="capitalize">{categoryKey}</span>
             </h2>
-            <div className="space-y-4">
-              {categoryNews.politics.map(news => (
-                <NewsCard
-                  key={news.id}
-                  id={news.id}
-                  title={news.title}
-                  excerpt={news.excerpt}
-                  image={getImageUrl(news.image)}
-                  category={news.category}
-                  date={news.date}
-                  url={news.url}
-                />
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+              {articles.map(article => (
+                <NewsCard key={article.id} {...article} />
               ))}
             </div>
-          </section>
-          <section className="lg:col-span-1">
-            <h2 className="section-title flex items-center">
-              <span className="mr-2">
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-              </span>
-              Business
-            </h2>
-            <div className="space-y-4">
-              {categoryNews.business.map(news => (
-                <NewsCard
-                  key={news.id}
-                  id={news.id}
-                  title={news.title}
-                  excerpt={news.excerpt}
-                  image={getImageUrl(news.image)}
-                  category={news.category}
-                  date={news.date}
-                  url={news.url}
-                />
-              ))}
+            <div className="mt-6 text-center">
+              <Link
+                href={`/category/${categoryKey}`}
+                className="inline-flex items-center px-6 py-3 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
+              >
+                <span>查看更多{categoryKey === 'politics' ? '政治' : 
+                          categoryKey === 'business' ? '財經' : '科技'}新聞</span>
+                <FontAwesomeIcon icon={faArrowRight} className="ml-2 h-4 w-4" />
+              </Link>
             </div>
           </section>
-          <section className="lg:col-span-1">
-            <h2 className="section-title flex items-center">
-              <span className="mr-2">
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                </svg>
-              </span>
-              Technology
-            </h2>
-            <div className="space-y-4">
-              {categoryNews.technology.map(news => (
-                <NewsCard
-                  key={news.id}
-                  id={news.id}
-                  title={news.title}
-                  excerpt={news.excerpt}
-                  image={getImageUrl(news.image)}
-                  category={news.category}
-                  date={news.date}
-                  url={news.url}
-                />
-              ))}
-            </div>
-          </section>
-        </div>
-        <section className="mb-12 bg-white p-6 rounded-xl shadow-md">
-          <h2 className="section-title flex items-center mb-6">
-            <span className="mr-2">
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
-              </svg>
-            </span>
-            Popular Tags
+        ))}
+
+        {/* 熱門標籤 */}
+        <section>
+          <h2 className="section-title flex items-center">
+            <FontAwesomeIcon icon={faTags} className="mr-2 text-blue-600 h-6 w-6" />
+            <span>熱門標籤</span>
           </h2>
           <div className="flex flex-wrap gap-3">
-            {popularTags.map(tag => (
-              <a
-                key={tag}
-                href={`/tag/${encodeURIComponent(tag)}`}
-                className="bg-gray-100 hover:bg-blue-100 text-gray-800 hover:text-blue-700 px-4 py-2 rounded-full text-sm font-medium transition-colors duration-300 flex items-center"
-              >
+            {popularTags.map((tag, index) => (
+              <Link key={index} href={`/tag/${encodeURIComponent(tag)}`} className="px-4 py-2 bg-gray-100 hover:bg-blue-100 text-gray-800 hover:text-blue-700 rounded-full transition-colors">
                 <span className="text-blue-500 mr-1">#</span>{tag}
-              </a>
+              </Link>
             ))}
           </div>
         </section>
-        <section className="mb-12 bg-gradient-to-r from-blue-600 to-blue-800 rounded-xl shadow-lg overflow-hidden">
-          <div className="flex flex-col md:flex-row items-center">
-            <div className="p-8 md:w-2/3 text-white">
-              <h2 className="text-2xl md:text-3xl font-bold mb-4">Stay Updated with Our Newsletter</h2>
-              <p className="mb-6 text-blue-100">訂閱我們的電子報，獲取最新新聞和獨家內容直達您的信箱。</p>
-              <form className="flex flex-col sm:flex-row gap-2 max-w-lg">
-                <input
-                  type="email"
-                  placeholder="您的電子郵件"
-                  className="px-4 py-3 w-full text-gray-800 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-300"
-                  required
+
+        {/* 訂閱電子報 */}
+        <section className="bg-gradient-to-r from-blue-600 to-blue-800 p-8 rounded-xl text-white">
+          <div className="grid md:grid-cols-2 gap-8 items-center">
+            <div>
+              <h2 className="text-2xl font-bold mb-4 flex items-center">
+                <FontAwesomeIcon icon={faEnvelope} className="mr-3 h-6 w-6" />
+                訂閱我們的電子報
+              </h2>
+              <p className="text-blue-100 mb-4">每日接收最新資訊，讓您隨時了解全球動態。我們將每天精選最重要的新聞發送到您的信箱。</p>
+            </div>
+            <div>
+              <form className="flex flex-col sm:flex-row gap-4">
+                <input 
+                  type="email" 
+                  placeholder="您的電子郵件地址" 
+                  className="flex-1 px-4 py-3 rounded-md focus:outline-none focus:ring-2 focus:ring-white text-gray-800" 
                 />
-                <button
-                  type="submit"
-                  className="px-6 py-3 bg-white text-blue-700 font-medium rounded-md hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-300 transition-colors whitespace-nowrap"
+                <button 
+                  type="submit" 
+                  className="whitespace-nowrap bg-white text-blue-700 px-6 py-3 rounded-md font-bold hover:bg-gray-100 transition-colors"
                 >
                   立即訂閱
                 </button>
               </form>
-              <p className="mt-3 text-xs text-blue-200">我們尊重您的隱私，不會分享您的信息。</p>
-            </div>
-            <div className="hidden md:block md:w-1/3">
-              <svg className="w-full h-full text-white opacity-10" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-              </svg>
+              <p className="mt-3 text-sm text-blue-200">我們尊重您的隱私，您可以隨時取消訂閱。</p>
             </div>
           </div>
         </section>
+
+        {/* 返回頂部按鈕 */}
+        {showScrollTop && (
+          <button
+            onClick={scrollToTop}
+            aria-label="回到頂部"
+            className="fixed bottom-6 right-6 p-3 bg-blue-600 text-white rounded-full shadow-lg hover:bg-blue-700 transition-colors"
+          >
+            <FontAwesomeIcon icon={faArrowUp} className="h-6 w-6" />
+          </button>
+        )}
       </main>
-      <footer className="bg-gray-900 text-white py-12">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-            <div className="space-y-4">
-              <h3 className="text-xl font-bold mb-4 border-b border-gray-700 pb-2">SJ Sphere News</h3>
-              <p className="text-gray-400">提供全球最即時的新聞資訊，涵蓋政治、財經、科技、娛樂、體育、健康等各領域。</p>
-              <div className="flex space-x-4 pt-2">
-                <a href="#" className="text-gray-400 hover:text-white transition-colors">
-                  <svg className="h-6 w-6" fill="currentColor" viewBox="0 0 24 24">
-                    <path d="M22 12c0-5.523-4.477-10-10-10S2 6.477 2 12c0 4.991 3.657 9.128 8.438 9.878v-6.987h-2.54V12h2.54V9.797c0-2.506 1.492-3.89 3.777-3.89 1.094 0 2.238.195 2.238.195v2.46h-1.26c-1.243 0-1.63.771-1.63 1.562V12h2.773l-.443 2.89h-2.33v6.988C18.343 21.128 22 16.991 22 12z"></path>
-                  </svg>
-                </a>
-                <a href="#" className="text-gray-400 hover:text-white transition-colors">
-                  <svg className="h-6 w-6" fill="currentColor" viewBox="0 0 24 24">
-                    <path d="M8.29 20.251c7.547 0 11.675-6.253 11.675-11.675 0-.178 0-.355-.012-.53A8.348 8.348 0 0022 5.92a8.19 8.19 0 01-2.357.646 4.118 4.118 0 001.804-2.27 8.224 8.224 0 01-2.605.996 4.107 4.107 0 00-6.993 3.743 11.65 11.65 0 01-8.457-4.287 4.106 4.106 0 001.27 5.477A4.072 4.072 0 012.8 9.713v.052a4.105 4.105 0 003.292 4.022 4.095 4.095 0 01-1.853.07 4.108 4.108 0 003.834 2.85A8.233 8.233 0 012 18.407a11.616 11.616 0 006.29 1.84"></path>
-                  </svg>
-                </a>
-                <a href="#" className="text-gray-400 hover:text-white transition-colors">
-                  <svg className="h-6 w-6" fill="currentColor" viewBox="0 0 24 24">
-                    <path d="M12.315 2c2.43 0 2.784.013 3.808.06 1.064.049 1.791.218 2.427.465a4.902 4.902 0 011.772 1.153 4.902 4.902 0 011.153 1.772c.247.636.416 1.363.465 2.427.048 1.067.06 1.407.06 4.123v.08c0 2.643-.012 2.987-.06 4.043-.049 1.064-.218 1.791-.465 2.427a4.902 4.902 0 01-1.153 1.772 4.902 4.902 0 01-1.772 1.153c-.636.247-1.363.416-2.427.465-1.067.048-1.407.06-4.123.06h-.08c-2.643 0-2.987-.012-4.043-.06-1.064-.049-1.791-.218-2.427-.465a4.902 4.902 0 01-1.772-1.153 4.902 4.902 0 01-1.153-1.772c-.247-.636-.416-1.363-.465-2.427-.047-1.024-.06-1.379-.06-3.808v-.63c0-2.43.013-2.784.06-3.808.049-1.064.218-1.791.465-2.427a4.902 4.902 0 011.153-1.772A4.902 4.902 0 015.45 2.525c.636-.247 1.363-.416 2.427-.465C8.901 2.013 9.256 2 11.685 2h.63zm-.081 1.802h-.468c-2.456 0-2.784.011-3.807.058-.975.045-1.504.207-1.857.344-.467.182-.8.398-1.15.748-.35.35-.566.683-.748 1.15-.137.353-.3.882-.344 1.857-.047 1.023-.058 1.351-.058 3.807v.468c0 2.456.011 2.784.058 3.807.045.975.207 1.504.344 1.857.182.466.399.8.748 1.15.35.35.683.566 1.15.748.353.137.882.3 1.857.344 1.054.048 1.37.058 4.041.058h.08c2.597 0 2.917-.01 3.96-.058.976-.045 1.505-.207 1.858-.344.466-.182.8-.398 1.15-.748.35-.35.566-.683.748-1.15.137-.353.3-.882.344-1.857.048-1.055.058-1.37.058-4.041v-.08c0-2.597-.01-2.917-.058-3.96-.045-.976-.207-1.505-.344-1.858a3.097 3.097 0 00-.748-1.15 3.098 3.098 0 00-1.15-.748c-.353-.137-.882-.3-1.857-.344-1.023-.047-1.351-.058-3.807-.058zM12 6.865a5.135 5.135 0 110 10.27 5.135 5.135 0 010-10.27zm0 1.802a3.333 3.333 0 100 6.666 3.333 3.333 0 000-6.666zm5.338-3.205a1.2 1.2 0 110 2.4 1.2 1.2 0 010-2.4z"></path>
-                  </svg>
-                </a>
-                <a href="#" className="text-gray-400 hover:text-white transition-colors">
-                  <svg className="h-6 w-6" fill="currentColor" viewBox="0 0 24 24">
-                    <path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"></path>
-                  </svg>
-                </a>
-              </div>
-            </div>
-            <div>
-              <h3 className="text-xl font-bold mb-4 border-b border-gray-700 pb-2">主要分類</h3>
-              <ul className="space-y-2 text-gray-400">
-                <li><a href="/category/politics" className="hover:text-white transition-colors">政治</a></li>
-                <li><a href="/category/business" className="hover:text-white transition-colors">財經</a></li>
-                <li><a href="/category/technology" className="hover:text-white transition-colors">科技</a></li>
-                <li><a href="/category/entertainment" className="hover:text-white transition-colors">娛樂</a></li>
-                <li><a href="/category/sports" className="hover:text-white transition-colors">體育</a></li>
-                <li><a href="/category/health" className="hover:text-white transition-colors">健康</a></li>
-              </ul>
-            </div>
-            <div>
-              <h3 className="text-xl font-bold mb-4 border-b border-gray-700 pb-2">快速連結</h3>
-              <ul className="space-y-2 text-gray-400">
-                <li><a href="/about" className="hover:text-white transition-colors">關於我們</a></li>
-                <li><a href="/contact" className="hover:text-white transition-colors">聯絡我們</a></li>
-                <li><a href="/privacy" className="hover:text-white transition-colors">隱私政策</a></li>
-                <li><a href="/terms" className="hover:text-white transition-colors">使用條款</a></li>
-                <li><a href="/advertise" className="hover:text-white transition-colors">廣告合作</a></li>
-                <li><a href="/careers" className="hover:text-white transition-colors">徵才資訊</a></li>
-              </ul>
-            </div>
-            <div>
-              <h3 className="text-xl font-bold mb-4 border-b border-gray-700 pb-2">選擇語言</h3>
-              <div className="grid grid-cols-2 gap-2 text-gray-400">
-                <a href="/en" className="hover:text-white transition-colors">English</a>
-                <a href="/th" className="hover:text-white transition-colors">ไทย</a>
-                <a href="/vi" className="hover:text-white transition-colors">Tiếng Việt</a>
-                <a href="/id" className="hover:text-white transition-colors">Bahasa</a>
-                <a href="/ko" className="hover:text-white transition-colors">한국어</a>
-                <a href="/ja" className="hover:text-white transition-colors">日本語</a>
-                <a href="/zh-tw" className="hover:text-white transition-colors">繁體中文</a>
-                <a href="/zh-cn" className="hover:text-white transition-colors">简体中文</a>
-                <a href="/zh-my" className="hover:text-white transition-colors">马来西亚中文</a>
-                <a href="/zh-sg" className="hover:text-white transition-colors">新加坡中文</a>
-                <a href="/zh-mo" className="hover:text-white transition-colors">澳門中文</a>
-              </div>
-            </div>
-          </div>
-          <div className="mt-12 pt-8 border-t border-gray-800 text-center text-gray-400">
-            <p className="mb-4">&copy; {currentYear} SJ Sphere News. All rights reserved.</p>
-            <p className="text-xs">本網站內容受到著作權法保護。未經授權，不得轉載或複製。</p>
-          </div>
-        </div>
-      </footer>
-      <button 
-        onClick={scrollToTop} 
-        className={`fixed bottom-6 right-6 p-3 bg-blue-600 text-white rounded-full shadow-lg z-50 transition-all duration-300 ${
-          showScrollTop ? 'opacity-100 visible translate-y-0' : 'opacity-0 invisible translate-y-10'
-        }`}
-        aria-label="回到頂部"
-      >
-        <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 10l7-7m0 0l7 7m-7-7v18" />
-        </svg>
-      </button>
-      <style jsx global>{`
-        @keyframes fadeInUp {
-          from {
-            opacity: 0;
-            transform: translateY(20px);
-          }
-          to {
-            opacity: 1;
-            transform: translateY(0);
-          }
-        }
-        @media (max-width: 640px) {
-          .section-title {
-            font-size: 1.25rem;
-            margin-bottom: 1rem;
-          }
-        }
-      `}</style>
-    </div>
+    </>
   );
 }
