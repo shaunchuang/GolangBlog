@@ -9,6 +9,8 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faHome, faNewspaper, faLandmark, faChartLine, faLaptopCode, faSearch, faGlobe } from '@fortawesome/free-solid-svg-icons';
 
 export default function Navbar() {
+  // 添加客戶端渲染檢測
+  const [isClient, setIsClient] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isSearchExpanded, setIsSearchExpanded] = useState(false);
@@ -19,19 +21,33 @@ export default function Navbar() {
   const router = useRouter();
   const locale = String(params.locale || 'en');
   const t = useTranslations('navigation');
+
+  // 客戶端初始化
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
   
   // 處理滾動事件以控制導航欄的陰影
   useEffect(() => {
+    // 確保只在客戶端執行
+    if (!isClient) return;
+
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 10);
     };
     
+    // 初始檢測
+    handleScroll();
+    
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
+  }, [isClient]); // 依賴於 isClient
   
   // 點擊頁面其他區域時關閉搜索框
   useEffect(() => {
+    // 確保只在客戶端執行
+    if (!isClient) return;
+    
     const handleClickOutside = (event: MouseEvent) => {
       const target = event.target as HTMLElement;
       if (isSearchExpanded && !target.closest('.search-container')) {
@@ -41,7 +57,7 @@ export default function Navbar() {
     
     document.addEventListener('click', handleClickOutside);
     return () => document.removeEventListener('click', handleClickOutside);
-  }, [isSearchExpanded]);
+  }, [isClient, isSearchExpanded]); // 依賴於 isClient
   
   // 處理搜索提交
   const handleSearchSubmit = (e: React.FormEvent) => {
@@ -61,7 +77,7 @@ export default function Navbar() {
   
   return (
     <header className={`fixed top-0 left-0 right-0 z-50 bg-white ${
-      isScrolled ? 'shadow-md' : ''
+      isClient && isScrolled ? 'shadow-md' : ''
     } transition-shadow duration-300`}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">

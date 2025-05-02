@@ -6,6 +6,7 @@ import { format, parseISO } from 'date-fns';
 import { zhTW, enUS, th, vi, id, ko, ja } from 'date-fns/locale';
 import { useParams } from 'next/navigation';
 import { useTranslations } from 'next-intl';
+import { useEffect, useState } from 'react';
 
 // 支援的語言區域設定
 const locales = {
@@ -47,6 +48,9 @@ export default function NewsCard({
   date,
   url
 }: NewsCardProps) {
+  // 解決 hydration 不匹配問題，標記客戶端渲染狀態
+  const [isClient, setIsClient] = useState(false);
+  
   // 獲取當前頁面路由參數
   const params = useParams();
   const locale = String(params.locale || 'en');
@@ -54,11 +58,16 @@ export default function NewsCard({
   // 獲取翻譯函數
   const t = useTranslations('Common');
   
+  // 在客戶端渲染後設置標誌
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
+  
   // 日期格式化邏輯
-  const formattedDate = (() => {
+  const formatDate = (dateString: string) => {
+    if (!dateString) return '';
     try {
-      if (!date) return '';
-      const dateObj = parseISO(date);
+      const dateObj = parseISO(dateString);
       if (isNaN(dateObj.getTime())) return '';
       
       return format(dateObj, 'PPP', { locale: getLocale(locale) });
@@ -66,7 +75,10 @@ export default function NewsCard({
       console.error('Error formatting date:', error);
       return '';
     }
-  })();
+  };
+  
+  // 在服務器端返回靜態內容，在客戶端渲染後才格式化日期
+  const formattedDate = isClient ? formatDate(date) : '';
   
   return (
     <div className="news-card relative flex flex-col overflow-hidden bg-white rounded-xl shadow-md h-full">
@@ -94,7 +106,8 @@ export default function NewsCard({
       {/* 文章內容 */}
       <div className="p-4 flex flex-col flex-grow">
         <time className="text-sm text-gray-500 mb-2" dateTime={date}>
-          {formattedDate}
+          {/* 如果在客戶端，顯示格式化的日期，否則顯示簡單的佔位符或不顯示 */}
+          {isClient ? formattedDate : ''}
         </time>
         <h3 className="text-lg font-bold mb-2 line-clamp-2 hover:text-blue-600 transition-colors">
           <Link href={url} className="hover:underline">

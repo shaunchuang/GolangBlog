@@ -1,36 +1,61 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# SJ Sphere News 新聞網站前端
 
-## Getting Started
+這是 SJ Sphere 多語言新聞網站的 Next.js 前端專案，使用 Next.js 15+、TypeScript、Tailwind CSS 和國際化 (i18n) 功能實現。
 
-First, run the development server:
+## 專案特色
+
+- 使用 Next.js 15+ 與 App Router 實現高性能 SSR/SSG 混合渲染
+- 支援 11 種語言的國際化設計：英文、泰文、越南文、印尼語、韓文、日文和多種中文變體
+- 響應式設計，適配從手機到桌面的各種裝置
+- 使用 Tailwind CSS 實現現代化 UI 設計
+- 針對 SEO 優化的元數據和結構化數據
+- 整合 FontAwesome 圖標庫實現豐富視覺效果
+
+## 本地開發
+
+### 環境需求
+
+- Node.js 18+ (推薦 20+)
+- npm 或 yarn 或 pnpm
+
+### 安裝依賴
+
+```bash
+npm install
+# 或
+yarn
+# 或
+pnpm install
+```
+
+### 啟動開發伺服器
 
 ```bash
 npm run dev
-# or
+# 或
 yarn dev
-# or
+# 或
 pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+應用將在 [http://localhost:3000](http://localhost:3000) 運行，並自動重定向到帶有語言前綴的 /zh-TW/home。
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## 項目結構
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+- `src/app/` - Next.js 應用路由和頁面
+  - `[locale]/` - 國際化路由
+    - `home/` - 首頁
+    - `news/` - 新聞詳情頁
+    - `category/` - 分類頁面
+  - `components/` - 共用組件
+- `src/lib/` - 工具函數和API配置
+- `messages/` - 多語言翻譯檔案
+- `public/` - 靜態資源
 
-## Learn More
+## 部署
 
-To learn more about Next.js, take a look at the following resources:
+專案使用 Hetzner Cloud 和 k3s 進行容器化部署，同時整合 Prometheus 和 Grafana 進行監控和日誌管理。
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## 域名和CDN
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+網站通過 Cloudflare 進行域名管理和CDN加速，主域名為 [news.sj-sphere.com](https://news.sj-sphere.com)。

@@ -90,7 +90,7 @@ export default async function RootLayout({
   const resolvedParams = await Promise.resolve(params);
   const locale = String(resolvedParams.locale);
   
-  // 安全地載入訊息，使用可預測的內容以避免水合錯誤
+  // 從根 messages 資料夾載入翻譯檔
   let messages;
   try {
     messages = (await import(`../../../messages/${locale}/messages.json`)).default;
