@@ -6,7 +6,7 @@ import { useEffect, useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { apiService } from '../../../lib/apiService';
-import { API_PATHS, IMAGE_BASE_URL } from '../../../lib/apiConfig';
+import { API_PATHS, IMAGE_BASE_URL, API_BASE_URL } from '../../../lib/apiConfig';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { 
   faNewspaper, 
@@ -60,7 +60,7 @@ export default function HomePage() {
   // 創建初始化狀態標記，用於防止 hydration 不匹配
   const [isClient, setIsClient] = useState(false);
   const params = useParams();
-  const locale = String(params.locale || 'zh-TW');
+  const locale = String(params?.locale || 'zh-TW');
   
   const [isLoading, setIsLoading] = useState(true);
   const [featuredNews, setFeaturedNews] = useState<Article[]>([]);

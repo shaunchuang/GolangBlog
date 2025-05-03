@@ -1,8 +1,15 @@
 import '../globals.css';
 import '../../../src/lib/fontawesome'; // 導入 Font Awesome 配置
+import { Inter } from 'next/font/google';
 import { NextIntlClientProvider } from 'next-intl';
+import { notFound } from 'next/navigation';
 import { locales } from '../../../src/locales';
 import { Metadata, Viewport } from 'next';
+
+// 支持的語言列表
+const supportedLocales = ['en', 'th', 'vi', 'id', 'ko', 'ja', 'zh-TW', 'zh-CN'];
+
+const inter = Inter({ subsets: ['latin'] });
 
 // 新增單獨的 viewport 配置，從 metadata 中分離
 export const viewport: Viewport = {
@@ -75,29 +82,30 @@ export const metadata: Metadata = {
 };
 
 export function generateStaticParams() {
-  return locales.map((locale) => ({ locale }));
+  return supportedLocales.map(locale => ({ locale }));
 }
 
-// 修改函數以正確處理動態參數和類型
-export default async function RootLayout({
+export default async function LocaleLayout({
   children,
   params,
 }: {
   children: React.ReactNode;
-  params: { locale: string | Promise<string> };
+  params: { locale: string };
 }) {
-  // 解析參數並確保 locale 是字串類型
-  const resolvedParams = await Promise.resolve(params);
-  const locale = String(resolvedParams.locale);
+  // 確保 locale 是字符串類型
+  const locale = Array.isArray(params.locale) ? params.locale[0] : params.locale;
   
-  // 從根 messages 資料夾載入翻譯檔
+  // 驗證是否為支持的語言
+  if (!supportedLocales.includes(locale)) {
+    notFound();
+  }
+
+  // 獲取翻譯訊息
   let messages;
   try {
     messages = (await import(`../../../messages/${locale}/messages.json`)).default;
   } catch (error) {
-    console.error(`Could not load messages for locale: ${locale}`, error);
-    // 提供一個簡單的備用消息對象
-    messages = {};
+    notFound();
   }
 
   return (
@@ -109,7 +117,7 @@ export default async function RootLayout({
         <link rel="apple-touch-icon" href="/apple-icon.png" />
         <link rel="manifest" href="/manifest.json" />
       </head>
-      <body className="min-h-screen bg-gray-50" suppressHydrationWarning>
+      <body className={`min-h-screen bg-gray-50 ${inter.className}`} suppressHydrationWarning>
         <NextIntlClientProvider locale={locale} messages={messages}>
           {children}
         </NextIntlClientProvider>

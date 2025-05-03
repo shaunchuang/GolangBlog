@@ -19,7 +19,8 @@ export default function Navbar() {
   const pathname = usePathname();
   const params = useParams();
   const router = useRouter();
-  const locale = String(params.locale || 'en');
+  // 使用 optional chaining 並提供默認值，以避免客戶端渲染期間的 undefined 問題
+  const locale = String(params?.locale || 'en');
   const t = useTranslations('navigation');
 
   // 客戶端初始化

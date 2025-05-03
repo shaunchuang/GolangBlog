@@ -173,7 +173,7 @@ export default function NewsCarousel({ customNews }: NewsCarouselProps) {
               
               <Image
                 src={getImageUrl(news.image)}
-                alt={news.title}
+                alt={news.title || `幻燈片 ${index + 1}`}
                 width={1280}
                 height={720}
                 sizes="(max-width: 768px) 100vw, 100vw"

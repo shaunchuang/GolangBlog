@@ -8,7 +8,8 @@ import { useRouter, useParams } from 'next/navigation';
 export default function RedirectPage() {
   const router = useRouter();
   const params = useParams();
-  const locale = String(params.locale || 'zh-TW');
+  // 使用可選鏈運算符確保即使 params 為 undefined 也不會出錯
+  const locale = String(params?.locale || 'zh-TW');
 
   useEffect(() => {
     // 在客戶端進行重定向
