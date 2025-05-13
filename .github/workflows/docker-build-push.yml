@@ -73,9 +73,11 @@ jobs:
       - name: Setup SSH key for file transfer
         run: |
           mkdir -p ~/.ssh
+          # 寫入私鑰並確保正確的格式（包含開頭和結尾）
           echo "${{ secrets.HETZNER_SSH_KEY }}" > ~/.ssh/id_rsa
           chmod 600 ~/.ssh/id_rsa
-          ssh-keyscan ${{ secrets.HETZNER_HOST }} >> ~/.ssh/known_hosts
+          # 自動接受主機金鑰
+          ssh-keyscan -H ${{ secrets.HETZNER_HOST }} >> ~/.ssh/known_hosts
           
       - name: Prepare and Transfer Deploy Files
         run: |
@@ -84,8 +86,17 @@ jobs:
           # 生成 Secret YAML
           ./scripts/gen-backend-secret.sh
           
-          # 通過 SCP 傳輸 Secret YAML 到 VM
-          scp -i ~/.ssh/id_rsa backend-env.yaml ${{ secrets.HETZNER_USER }}@${{ secrets.HETZNER_HOST }}:~/backend-env.yaml
+          # 調試：顯示 SSH 配置和連接信息
+          echo "嘗試 SSH 連接到 ${{ secrets.HETZNER_USER }}@${{ secrets.HETZNER_HOST }}..."
+          ssh -v -i ~/.ssh/id_rsa -o StrictHostKeyChecking=no ${{ secrets.HETZNER_USER }}@${{ secrets.HETZNER_HOST }} 'echo SSH連接成功'
+          
+          # 通過 SCP 傳輸 Secret YAML 到 VM（增加 -v 選項以獲取詳細訊息）
+          scp -v -i ~/.ssh/id_rsa -o StrictHostKeyChecking=no backend-env.yaml ${{ secrets.HETZNER_USER }}@${{ secrets.HETZNER_HOST }}:~/backend-env.yaml || true
+          
+          # 備份方案：將文件內容編碼成 base64 並傳到下一步
+          echo "將 YAML 檔案進行 base64 編碼作為備份方案"
+          BACKEND_ENV_YAML=$(cat backend-env.yaml | base64 -w 0)
+          echo "BACKEND_ENV_YAML=${BACKEND_ENV_YAML}" >> $GITHUB_ENV
           
       - name: Deploy to k3s on Hetzner VM via SSH
         uses: appleboy/ssh-action@v0.1.7
@@ -93,10 +104,19 @@ jobs:
           host: ${{ secrets.HETZNER_HOST }}
           username: ${{ secrets.HETZNER_USER }}
           key: ${{ secrets.HETZNER_SSH_KEY }}
+          debug: true
+          use_insecure_cipher: true
+          envs: BACKEND_ENV_YAML
           script: |
             # 將 KUBECONFIG 傳到 VM 上
             echo "${{ secrets.KUBECONFIG }}" | base64 -d > ~/kubeconfig
             export KUBECONFIG=~/kubeconfig
+            
+            # 檢查 backend-env.yaml 檔案是否已成功傳輸
+            if [ ! -f ~/backend-env.yaml ]; then
+              echo "未找到 backend-env.yaml，從環境變數中恢復"
+              echo "$BACKEND_ENV_YAML" | base64 -d > ~/backend-env.yaml
+            fi
             
             # 套用 Secret
             kubectl apply -f ~/backend-env.yaml --insecure-skip-tls-verify --validate=false
