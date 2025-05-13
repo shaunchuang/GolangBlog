@@ -1,4 +1,4 @@
-name: Build, Push and Deploy to k3s
+name: Build, Push and Deploy to k3s via SSH
 
 on:
   push:
@@ -6,8 +6,12 @@ on:
       - main
 
 jobs:
-  build-push-deploy:
+  build-push:
     runs-on: ubuntu-latest
+
+    outputs:
+      frontend_changed: ${{ steps.changes.outputs.frontend_changed }}
+      backend_changed: ${{ steps.changes.outputs.backend_changed }}
 
     steps:
     - name: Checkout code
@@ -59,34 +63,55 @@ jobs:
         push: true
         tags: ghcr.io/${{ secrets.GHCR_USERNAME }}/backend:latest
 
-    - name: Decode and set kubeconfig
-      run: |
-        echo "${{ secrets.KUBECONFIG }}" | base64 -d > kubeconfig
-        export KUBECONFIG=$PWD/kubeconfig
-
-    - name: Generate backend-env Secret YAML
-      run: |
-        chmod +x scripts/gen-backend-secret.sh
-        ./scripts/gen-backend-secret.sh
-     
-    - name: Debug backend-env.yaml
-      run: |
-        echo "🔍 backend-env.yaml 內容："
-        cat backend-env.yaml
-
-    - name: Apply backend-env Secret to k3s
-      run: |
-        export KUBECONFIG=$PWD/kubeconfig
-        kubectl apply -f backend-env.yaml --insecure-skip-tls-verify --validate=false
-
-    - name: Update backend deployment if backend changed
-      if: steps.changes.outputs.backend_changed == 'true'
-      run: |
-        export KUBECONFIG=$PWD/kubeconfig
-        kubectl set image deployment/backend backend=ghcr.io/${{ secrets.GHCR_USERNAME }}/backend:latest --namespace=default
-
-    - name: Update frontend deployment if frontend changed
-      if: steps.changes.outputs.frontend_changed == 'true'
-      run: |
-        export KUBECONFIG=$PWD/kubeconfig
-        kubectl set image deployment/frontend frontend=ghcr.io/${{ secrets.GHCR_USERNAME }}/frontend:latest --namespace=default
+  deploy-via-ssh:
+    needs: build-push
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        
+      - name: Setup SSH key for file transfer
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.HETZNER_SSH_KEY }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          ssh-keyscan ${{ secrets.HETZNER_HOST }} >> ~/.ssh/known_hosts
+          
+      - name: Prepare and Transfer Deploy Files
+        run: |
+          # 將腳本設為可執行
+          chmod +x ./scripts/gen-backend-secret.sh
+          # 生成 Secret YAML
+          ./scripts/gen-backend-secret.sh
+          
+          # 通過 SCP 傳輸 Secret YAML 到 VM
+          scp -i ~/.ssh/id_rsa backend-env.yaml ${{ secrets.HETZNER_USER }}@${{ secrets.HETZNER_HOST }}:~/backend-env.yaml
+          
+      - name: Deploy to k3s on Hetzner VM via SSH
+        uses: appleboy/ssh-action@v0.1.7
+        with:
+          host: ${{ secrets.HETZNER_HOST }}
+          username: ${{ secrets.HETZNER_USER }}
+          key: ${{ secrets.HETZNER_SSH_KEY }}
+          script: |
+            # 將 KUBECONFIG 傳到 VM 上
+            echo "${{ secrets.KUBECONFIG }}" | base64 -d > ~/kubeconfig
+            export KUBECONFIG=~/kubeconfig
+            
+            # 套用 Secret
+            kubectl apply -f ~/backend-env.yaml --insecure-skip-tls-verify --validate=false
+            
+            # 更新 deployment image
+            if [ "${{ needs.build-push.outputs.backend_changed }}" = "true" ]; then
+              echo "🔄 更新後端 deployment..."
+              kubectl set image deployment/backend \
+                backend=ghcr.io/${{ secrets.GHCR_USERNAME }}/backend:latest \
+                --namespace=default
+            fi
+            
+            if [ "${{ needs.build-push.outputs.frontend_changed }}" = "true" ]; then
+              echo "🔄 更新前端 deployment..."
+              kubectl set image deployment/frontend \
+                frontend=ghcr.io/${{ secrets.GHCR_USERNAME }}/frontend:latest \
+                --namespace=default
+            fi

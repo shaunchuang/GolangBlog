@@ -33,7 +33,27 @@
     "subscribe": "訂閱",
     "emailPlaceholder": "您的電子郵件",
     "subscribeToNewsletter": "訂閱我們的電子報",
-    "privacyNotice": "我們尊重您的隱私，不會分享您的信息。"
+    "privacyNotice": "我們尊重您的隱私，不會分享您的信息。",
+    "content": {
+      "articles": {
+        "0": {
+          "title": "科技新聞標題 1",
+          "excerpt": "這是關於最新科技發展的簡短摘要。"
+        },
+        "1": {
+          "title": "財經新聞標題 2",
+          "excerpt": "這是關於市場趨勢的簡短摘要。"
+        },
+        "2": {
+          "title": "健康新聞標題 3",
+          "excerpt": "這是關於健康和生活方式的簡短摘要。"
+        },
+        "3": {
+          "title": "體育新聞標題 4",
+          "excerpt": "這是關於體育賽事的簡短摘要。"
+        }
+      }
+    }
   },
   "latestNews": "最新新聞",
   "trending": "熱門話題",

@@ -13,6 +13,18 @@ metadata:
 type: Opaque
 data:" > backend-env.yaml
 
+# 檢查環境變數檔案存在
+if [ -f "./backend/.env" ]; then
+  ENV_FILE="./backend/.env"
+elif [ -f "../backend/.env" ]; then
+  ENV_FILE="../backend/.env"
+else
+  echo "❌ 錯誤：找不到 backend/.env 檔案"
+  exit 1
+fi
+
+echo "✅ 使用環境變數檔案: $ENV_FILE"
+
 while IFS='=' read -r key value || [[ -n "$key" ]]
 do
   if [[ -n "$key" && ! "$key" =~ ^# ]]; then
@@ -26,6 +38,6 @@ do
       echo "  $key: \"$encoded_value\"" >> backend-env.yaml
     fi
   fi
-done < ./backend/.env
+done < "$ENV_FILE"
 
 echo "✅ backend-env.yaml 生成完成"

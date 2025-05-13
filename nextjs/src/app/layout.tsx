@@ -1,24 +1,28 @@
-import type { Metadata } from 'next'
-import { Inter } from 'next/font/google'
-import './globals.css'
+// 只須在這裡 import 一次 globals.css
+import '../app/globals.css';
+import { NextIntlClientProvider } from 'next-intl';
+import { getLocale, getMessages } from 'next-intl/server';
 
-const inter = Inter({ subsets: ['latin'] })
+export const metadata = {
+  title: '新聞網站',
+  description: '使用 Next.js 與 Tailwind CSS 建置的新聞網站',
+};
 
-export const metadata: Metadata = {
-  title: 'SJ Sphere News',
-  description: '提供最新國際新聞、財經、科技、體育等各類新聞資訊',
-}
-
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: {
-  children: React.ReactNode
+  children: React.ReactNode;
 }) {
+  const locale = await getLocale();
+  const messages = await getMessages();
+
   return (
-    <html lang="zh-TW">
-      <body className={inter.className}>
-        {children}
+    <html lang={locale}>
+      <body>
+        <NextIntlClientProvider locale={locale} messages={messages}>
+          {children}
+        </NextIntlClientProvider>
       </body>
     </html>
-  )
+  );
 }
