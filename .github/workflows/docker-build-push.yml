@@ -86,17 +86,33 @@ jobs:
           # 生成 Secret YAML
           ./scripts/gen-backend-secret.sh
           
+          # 替換 K8s 清單中的佔位符
+          sed -i "s/GHCR_USERNAME_PLACEHOLDER/${{ secrets.GHCR_USERNAME }}/g" ./scripts/k8s-manifests/backend-deployment.yaml
+          sed -i "s/GHCR_USERNAME_PLACEHOLDER/${{ secrets.GHCR_USERNAME }}/g" ./scripts/k8s-manifests/frontend-deployment.yaml
+          
           # 調試：顯示 SSH 配置和連接信息
           echo "嘗試 SSH 連接到 ${{ secrets.HETZNER_USER }}@${{ secrets.HETZNER_HOST }}..."
           ssh -v -i ~/.ssh/id_rsa -o StrictHostKeyChecking=no ${{ secrets.HETZNER_USER }}@${{ secrets.HETZNER_HOST }} 'echo SSH連接成功'
           
-          # 通過 SCP 傳輸 Secret YAML 到 VM（增加 -v 選項以獲取詳細訊息）
+          # 通過 SCP 傳輸檔案到 VM
           scp -v -i ~/.ssh/id_rsa -o StrictHostKeyChecking=no backend-env.yaml ${{ secrets.HETZNER_USER }}@${{ secrets.HETZNER_HOST }}:~/backend-env.yaml || true
+          scp -v -i ~/.ssh/id_rsa -o StrictHostKeyChecking=no ./scripts/k8s-manifests/backend-deployment.yaml ${{ secrets.HETZNER_USER }}@${{ secrets.HETZNER_HOST }}:~/backend-deployment.yaml || true
+          scp -v -i ~/.ssh/id_rsa -o StrictHostKeyChecking=no ./scripts/k8s-manifests/frontend-deployment.yaml ${{ secrets.HETZNER_USER }}@${{ secrets.HETZNER_HOST }}:~/frontend-deployment.yaml || true
+          scp -v -i ~/.ssh/id_rsa -o StrictHostKeyChecking=no ./scripts/k8s-manifests/ingress.yaml ${{ secrets.HETZNER_USER }}@${{ secrets.HETZNER_HOST }}:~/ingress.yaml || true
           
           # 備份方案：將文件內容編碼成 base64 並傳到下一步
           echo "將 YAML 檔案進行 base64 編碼作為備份方案"
           BACKEND_ENV_YAML=$(cat backend-env.yaml | base64 -w 0)
           echo "BACKEND_ENV_YAML=${BACKEND_ENV_YAML}" >> $GITHUB_ENV
+          
+          BACKEND_DEPLOYMENT_YAML=$(cat ./scripts/k8s-manifests/backend-deployment.yaml | base64 -w 0)
+          echo "BACKEND_DEPLOYMENT_YAML=${BACKEND_DEPLOYMENT_YAML}" >> $GITHUB_ENV
+          
+          FRONTEND_DEPLOYMENT_YAML=$(cat ./scripts/k8s-manifests/frontend-deployment.yaml | base64 -w 0)
+          echo "FRONTEND_DEPLOYMENT_YAML=${FRONTEND_DEPLOYMENT_YAML}" >> $GITHUB_ENV
+          
+          INGRESS_YAML=$(cat ./scripts/k8s-manifests/ingress.yaml | base64 -w 0)
+          echo "INGRESS_YAML=${INGRESS_YAML}" >> $GITHUB_ENV
           
       - name: Deploy to k3s on Hetzner VM via SSH
         uses: appleboy/ssh-action@v0.1.7
@@ -106,32 +122,74 @@ jobs:
           key: ${{ secrets.HETZNER_SSH_KEY }}
           debug: true
           use_insecure_cipher: true
-          envs: BACKEND_ENV_YAML
+          envs: BACKEND_ENV_YAML,BACKEND_DEPLOYMENT_YAML,FRONTEND_DEPLOYMENT_YAML,INGRESS_YAML
           script: |
             # 將 KUBECONFIG 傳到 VM 上
             echo "${{ secrets.KUBECONFIG }}" | base64 -d > ~/kubeconfig
             export KUBECONFIG=~/kubeconfig
             
-            # 檢查 backend-env.yaml 檔案是否已成功傳輸
+            # 確保所有 YAML 檔案都存在
             if [ ! -f ~/backend-env.yaml ]; then
               echo "未找到 backend-env.yaml，從環境變數中恢復"
               echo "$BACKEND_ENV_YAML" | base64 -d > ~/backend-env.yaml
             fi
             
-            # 套用 Secret
+            if [ ! -f ~/backend-deployment.yaml ]; then
+              echo "未找到 backend-deployment.yaml，從環境變數中恢復"
+              echo "$BACKEND_DEPLOYMENT_YAML" | base64 -d > ~/backend-deployment.yaml
+            fi
+            
+            if [ ! -f ~/frontend-deployment.yaml ]; then
+              echo "未找到 frontend-deployment.yaml，從環境變數中恢復"
+              echo "$FRONTEND_DEPLOYMENT_YAML" | base64 -d > ~/frontend-deployment.yaml
+            fi
+            
+            if [ ! -f ~/ingress.yaml ]; then
+              echo "未找到 ingress.yaml，從環境變數中恢復"
+              echo "$INGRESS_YAML" | base64 -d > ~/ingress.yaml
+            fi
+            
+            # 創建 GitHub Container Registry Secret（如果不存在）
+            echo "🔑 確保 Container Registry Secret 存在..."
+            if ! kubectl get secret ghcr-secret &>/dev/null; then
+              kubectl create secret docker-registry ghcr-secret \
+                --docker-server=ghcr.io \
+                --docker-username="${{ secrets.GHCR_USERNAME }}" \
+                --docker-password="${{ secrets.GHCR_TOKEN }}"
+              echo "✅ 已創建 Container Registry Secret"
+            else
+              echo "✅ Container Registry Secret 已存在"
+            fi
+            
+            # 套用 Kubernetes 資源
+            echo "🔄 套用 backend-env Secret..."
             kubectl apply -f ~/backend-env.yaml --insecure-skip-tls-verify --validate=false
             
-            # 更新 deployment image
+            echo "🔄 部署 Backend Deployment 和 Service..."
+            kubectl apply -f ~/backend-deployment.yaml
+            
+            echo "🔄 部署 Frontend Deployment 和 Service..."
+            kubectl apply -f ~/frontend-deployment.yaml
+            
+            echo "🔄 部署 Ingress 規則..."
+            kubectl apply -f ~/ingress.yaml
+            
+            # 強制更新 Image 版本（如果有變更）
             if [ "${{ needs.build-push.outputs.backend_changed }}" = "true" ]; then
-              echo "🔄 更新後端 deployment..."
-              kubectl set image deployment/backend \
-                backend=ghcr.io/${{ secrets.GHCR_USERNAME }}/backend:latest \
-                --namespace=default
+              echo "🔄 強制更新後端 deployment 映像..."
+              kubectl rollout restart deployment/backend
             fi
             
             if [ "${{ needs.build-push.outputs.frontend_changed }}" = "true" ]; then
-              echo "🔄 更新前端 deployment..."
-              kubectl set image deployment/frontend \
-                frontend=ghcr.io/${{ secrets.GHCR_USERNAME }}/frontend:latest \
-                --namespace=default
+              echo "🔄 強制更新前端 deployment 映像..."
+              kubectl rollout restart deployment/frontend
             fi
+            
+            # 檢查部署狀態
+            echo "📊 檢查 Deployment 狀態..."
+            kubectl get deployments
+            kubectl get pods
+            kubectl get services
+            kubectl get ingress
+            
+            echo "✅ 部署完成"
