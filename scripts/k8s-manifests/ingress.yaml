@@ -4,26 +4,37 @@ metadata:
   name: web-ingress
   namespace: default
   annotations:
+    # ➜ 如果 frontend 真的需要把 /abc 重寫成 / ，保留；否則可整行刪掉
     nginx.ingress.kubernetes.io/rewrite-target: /
-    # Cert-Manager 注解
-    cert-manager.io/cluster-issuer: "letsencrypt-prod"
+    # 讓 cert-manager 幫你簽 TLS
+    cert-manager.io/cluster-issuer: letsencrypt-prod
     kubernetes.io/tls-acme: "true"
+    # 舊版註解仍可留著，雙保險
+    kubernetes.io/ingress.class: "nginx"
 spec:
+  # ★ 關鍵：明確指定 nginx IngressClass
+  ingressClassName: nginx
+
   tls:
   - hosts:
-    - blog.sj-sphere.com
+      - blog.sj-sphere.com
     secretName: blog-sj-sphere-tls
+
   rules:
   - host: blog.sj-sphere.com
     http:
       paths:
+      # ========= Frontend =========
       - path: /
-        pathType: Prefix
+        pathType: Prefix          # 把所有非 /api 的流量送到 frontend
         backend:
           service:
             name: frontend
             port:
               number: 80
+
+      # ========= Backend API =========
+      # 如果後端期望完整 /api/xxx 路徑，直接 Prefix 即可，不要 rewrite
       - path: /api
         pathType: Prefix
         backend:
